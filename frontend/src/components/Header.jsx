@@ -21,10 +21,14 @@ const Header = () => {
                         {isAuthenticated ? (
                             <li className="flex items-center space-x-4">
                                 <span className="text-sm font-medium text-gray-600">Hi, {user?.name || 'User'}</span>
-                                <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition">Logout</button>
+                                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 transition">Dashboard</Link>
+                                <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm">Logout</button>
                             </li>
                         ) : (
-                            <li><button onClick={() => dispatch({ type: 'auth/login', payload: { name: 'Demo User' } })} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Login (Demo)</button></li>
+                            <li className="flex items-center space-x-4">
+                                <Link to="/login" className="text-gray-700 hover:text-blue-600 transition">Login</Link>
+                                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm">Sign Up</Link>
+                            </li>
                         )}
                     </ul>
                 </nav>
