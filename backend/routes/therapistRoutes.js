@@ -1,12 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 const {
-getTherapists,
-createTherapist,
-} = require("../controllers/therapistController");
+  getTherapists,
+  createTherapist,
+  deleteTherapist,
+} = require('../controllers/therapistController');
 
-router.get("/", getTherapists);
-router.post("/", createTherapist);
+router.route('/').get(getTherapists).post(createTherapist);
+router.route('/:id').delete(deleteTherapist);
 
 module.exports = router;

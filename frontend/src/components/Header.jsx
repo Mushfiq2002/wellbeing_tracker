@@ -37,4 +37,5 @@ const Header = () => {
     );
 };
 
+<Link to="/therapists">Therapists</Link>
 export default Header;
