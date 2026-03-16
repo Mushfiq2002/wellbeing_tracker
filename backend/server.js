@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const userRoutes = require('./routes/userRoutes');
+const therapistRoutes = require('./routes/therapistRoutes');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/therapists', therapistRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
