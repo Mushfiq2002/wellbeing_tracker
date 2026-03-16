@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Therapists from './pages/Therapists';
 import Todo from './pages/Todo';
 
 import MedicineReminder from './pages/MedicineReminder';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/therapists" element={<Therapists />} />
             <Route path="/reminders" element={<MedicineReminder />} />
             <Route path="/sleep-tracker" element={<SleepTracker />} />
             <Route path="/todo" element={<Todo />} />
