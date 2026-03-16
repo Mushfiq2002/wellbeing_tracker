@@ -6,6 +6,7 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 const userRoutes = require('./routes/userRoutes');
 const sleepRoutes = require('./routes/sleepRoutes');
 const todoRoutes = require('./routes/todoRoutes');
+const medicineRoutes = require('./routes/medicineRoutes');
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api/users', userRoutes);
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/api/medicines', medicineRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
