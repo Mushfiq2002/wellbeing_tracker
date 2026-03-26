@@ -8,6 +8,7 @@ import Todo from './pages/Todo';
 
 import MedicineReminder from './pages/MedicineReminder';
 import SleepTracker from './pages/SleepTracker';
+import Friends from './pages/Friends';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/reminders" element={<MedicineReminder />} />
             <Route path="/sleep-tracker" element={<SleepTracker />} />
             <Route path="/todo" element={<Todo />} />
+            <Route path="/friends" element={<Friends />} />
           </Routes>
         </main>
       </div>
