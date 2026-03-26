@@ -25,6 +25,7 @@ const Header = () => {
                                 <Link to="/todo" className="text-gray-700 hover:text-blue-600 transition">To-Do List</Link>
                                 <Link to="/reminders" className="text-gray-700 hover:text-blue-600 transition">Reminders</Link>
                                 <Link to="/sleep-tracker" className="text-gray-700 hover:text-indigo-600 transition">Sleep Tracker</Link>
+                                <Link to="/friends" className="text-gray-700 hover:text-blue-600 transition">Friends</Link>
                                 <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm">Logout</button>
                             </li>
                         ) : (

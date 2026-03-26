@@ -21,6 +21,10 @@ const userSchema = mongoose.Schema(
             enum: ['user', 'therapist'],
             default: 'user',
         },
+        description: {
+            type: String,
+            default: '',
+        },
     },
     {
         timestamps: true,
