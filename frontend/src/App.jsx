@@ -14,6 +14,7 @@ import MyAppointments from './pages/MyAppointments';
 
 
 
+import Friends from './pages/Friends';
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
 
             <Route path="/book-appointment" element={<BookAppointment />} />
             <Route path="/my-appointments" element={<MyAppointments />} />
+            <Route path="/friends" element={<Friends />} />
           </Routes>
         </main>
       </div>
