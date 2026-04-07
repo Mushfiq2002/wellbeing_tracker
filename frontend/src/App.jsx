@@ -11,6 +11,7 @@ import MedicineReminder from './pages/MedicineReminder';
 import SleepTracker from './pages/SleepTracker';
 import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
+import MoodTracker from './pages/MoodTracker';
 
 
 
@@ -31,8 +32,9 @@ function App() {
             <Route path="/therapists" element={<Therapists />} />
             <Route path="/reminders" element={<MedicineReminder />} />
             <Route path="/sleep-tracker" element={<SleepTracker />} />
+            <Route path="/mood-tracker" element={<MoodTracker />} />
             <Route path="/todo" element={<Todo />} />
-            
+
 
 
 

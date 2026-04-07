@@ -11,6 +11,7 @@ const todoRoutes = require('./routes/todoRoutes');
 const medicineRoutes = require('./routes/medicineRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const friendRoutes = require('./routes/friendRoutes');
+const moodRoutes = require('./routes/moodRoutes');
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/moods', moodRoutes);
 
 app.use('/api/appointments', require('./routes/appointmentRoutes'));
 
