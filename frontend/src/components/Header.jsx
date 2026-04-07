@@ -4,7 +4,7 @@ import { logout } from '../store/slices/authSlice';
 
 const Header = () => {
     const dispatch = useDispatch();
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const { isAuthenticated } = useSelector((state) => state.auth);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -13,11 +13,20 @@ const Header = () => {
     return (
         <header className="bg-white shadow">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <Link to="/" className="text-2xl font-bold text-primary-500">MERN Boilerplate</Link>
+                
+                <Link to="/" className="text-2xl font-bold text-primary-500">
+                    Wellbeing Tracker
+                </Link>
+
                 <nav>
                     <ul className="flex space-x-6 items-center">
-                        <li><Link to="/" className="text-gray-700 hover:text-blue-600 transition">Home</Link></li>
-                        <li><Link to="/about" className="text-gray-700 hover:text-blue-600 transition">About</Link></li>
+                        
+                        <li>
+                            <Link to="/" className="text-gray-700 hover:text-blue-600">
+                                Home
+                            </Link>
+                        </li>
+
                         {isAuthenticated ? (
                             <li className="flex flex-wrap items-center gap-4 space-x-0">
                                 <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 transition">
@@ -67,8 +76,13 @@ const Header = () => {
                             </li>
                         ) : (
                             <li className="flex items-center space-x-4">
-                                <Link to="/login" className="text-gray-700 hover:text-blue-600 transition">Login</Link>
-                                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm">Sign Up</Link>
+                                <Link to="/login" className="text-gray-700 hover:text-blue-600">
+                                    Login
+                                </Link>
+
+                                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+                                    Sign Up
+                                </Link>
                             </li>
                         )}
                     </ul>
