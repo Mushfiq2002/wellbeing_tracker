@@ -4,7 +4,7 @@ import TherapistCard from "../components/TherapistCard";
 
 const Therapists = () => {
   const [therapists, setTherapists] = useState([]);
-
+  
   useEffect(() => {
     const fetchTherapists = async () => {
       const data = await getTherapists();
