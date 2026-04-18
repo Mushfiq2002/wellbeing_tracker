@@ -5,7 +5,9 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const userInfo = JSON.parse(localStorage.getItem('user'));
+  const userInfo =
+    JSON.parse(localStorage.getItem('user')) ||
+    JSON.parse(localStorage.getItem('userInfo'));
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -33,6 +35,33 @@ const MyAppointments = () => {
       setLoading(false);
     }
   }, [userInfo]);
+
+  const handleCancel = async (id) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/appointments/${id}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment._id === id
+            ? { ...appointment, status: 'cancelled' }
+            : appointment
+        )
+      );
+
+      alert('Appointment cancelled successfully');
+    } catch (error) {
+      console.error('Cancel error:', error.response?.data || error.message);
+      alert(error?.response?.data?.message || 'Failed to cancel appointment');
+    }
+  };
 
   if (!userInfo?.token) {
     return <div className="p-6 text-center">Please login first.</div>;
@@ -77,6 +106,28 @@ const MyAppointments = () => {
 
               {appointment.notes && (
                 <p><strong>Notes:</strong> {appointment.notes}</p>
+              )}
+
+              {appointment.modeOfSession === 'online' &&
+                appointment.meetingLink &&
+                appointment.status !== 'cancelled' && (
+                  <a
+                    href={appointment.meetingLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block mt-3 mr-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Join Session
+                  </a>
+                )}
+
+              {appointment.status !== 'cancelled' && (
+                <button
+                  onClick={() => handleCancel(appointment._id)}
+                  className="inline-block mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                >
+                  Cancel Appointment
+                </button>
               )}
             </div>
           ))}

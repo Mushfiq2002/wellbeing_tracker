@@ -6,7 +6,6 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Therapists from './pages/Therapists';
 import Todo from './pages/Todo';
-
 import MedicineReminder from './pages/MedicineReminder';
 import SleepTracker from './pages/SleepTracker';
 import BookAppointment from './pages/BookAppointment';
@@ -40,6 +39,7 @@ function App() {
 
 
             <Route path="/book-appointment" element={<BookAppointment />} />
+            <Route path="/book/:id" element={<BookAppointment />} />
             <Route path="/my-appointments" element={<MyAppointments />} />
             <Route path="/friends" element={<Friends />} />
           </Routes>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BookAppointment = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     therapist: '',
@@ -17,7 +17,9 @@ const BookAppointment = () => {
   const [therapists, setTherapists] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const userInfo = JSON.parse(localStorage.getItem('user'));
+  const userInfo =
+    JSON.parse(localStorage.getItem('user')) ||
+    JSON.parse(localStorage.getItem('userInfo'));
 
   useEffect(() => {
     if (!userInfo?.token) {
@@ -36,13 +38,13 @@ const BookAppointment = () => {
 
     fetchTherapists();
 
-    if (location.state?.therapistId) {
+    if (id) {
       setFormData((prev) => ({
         ...prev,
-        therapist: location.state.therapistId,
+        therapist: id,
       }));
     }
-  }, [navigate, location.state, userInfo]);
+  }, [navigate, userInfo, id]);
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
