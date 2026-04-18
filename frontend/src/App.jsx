@@ -10,6 +10,12 @@ import MedicineReminder from './pages/MedicineReminder';
 import SleepTracker from './pages/SleepTracker';
 import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
+import MoodTracker from './pages/MoodTracker';
+
+
+
+import Friends from './pages/Friends';
+
 
 function App() {
   return (
@@ -25,11 +31,17 @@ function App() {
             <Route path="/therapists" element={<Therapists />} />
             <Route path="/reminders" element={<MedicineReminder />} />
             <Route path="/sleep-tracker" element={<SleepTracker />} />
+            <Route path="/mood-tracker" element={<MoodTracker />} />
             <Route path="/todo" element={<Todo />} />
+
+
+
+
 
             <Route path="/book-appointment" element={<BookAppointment />} />
             <Route path="/book/:id" element={<BookAppointment />} />
             <Route path="/my-appointments" element={<MyAppointments />} />
+            <Route path="/friends" element={<Friends />} />
           </Routes>
         </main>
       </div>
