@@ -6,15 +6,10 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Therapists from './pages/Therapists';
 import Todo from './pages/Todo';
-
 import MedicineReminder from './pages/MedicineReminder';
 import SleepTracker from './pages/SleepTracker';
 import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
-
-
-
-
 
 function App() {
   return (
@@ -31,12 +26,9 @@ function App() {
             <Route path="/reminders" element={<MedicineReminder />} />
             <Route path="/sleep-tracker" element={<SleepTracker />} />
             <Route path="/todo" element={<Todo />} />
-            
-
-
-
 
             <Route path="/book-appointment" element={<BookAppointment />} />
+            <Route path="/book/:id" element={<BookAppointment />} />
             <Route path="/my-appointments" element={<MyAppointments />} />
           </Routes>
         </main>

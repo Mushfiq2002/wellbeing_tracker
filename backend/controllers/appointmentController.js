@@ -5,12 +5,22 @@ const Appointment = require('../models/appointmentModel');
 // @access  Private
 const createAppointment = async (req, res) => {
   try {
+    console.log('CREATE HIT');
+    console.log(req.body);
+    console.log('USER:', req.user._id);
+
     const { therapist, appointmentDate, timeSlot, modeOfSession, notes } = req.body;
 
     if (!therapist || !appointmentDate || !timeSlot) {
       return res.status(400).json({
         message: 'Please provide therapist, appointment date, and time slot',
       });
+    }
+
+    let meetingLink = '';
+
+    if (modeOfSession === 'online') {
+      meetingLink = `https://meet.jit.si/session-${Date.now()}`;
     }
 
     const appointment = await Appointment.create({
@@ -21,6 +31,7 @@ const createAppointment = async (req, res) => {
       modeOfSession,
       notes,
       status: 'pending',
+      meetingLink,
     });
 
     const populatedAppointment = await Appointment.findById(appointment._id)
@@ -40,6 +51,9 @@ const createAppointment = async (req, res) => {
 // @access  Private
 const getMyAppointments = async (req, res) => {
   try {
+    console.log('GET MY APPOINTMENTS HIT');
+    console.log('USER:', req.user._id);
+
     const appointments = await Appointment.find({ user: req.user._id })
       .populate('therapist', 'name specialization location consultationFee availability modeOfSession')
       .sort({ createdAt: -1 });
