@@ -5,6 +5,10 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 const userRoutes = require('./routes/userRoutes');
+const sleepRoutes = require('./routes/sleepRoutes');
+const todoRoutes = require('./routes/todoRoutes');
+const calendarRoutes = require('./routes/calendarRoutes');
+const streakRoutes = require('./routes/streakRoutes');
 const therapistRoutes = require('./routes/therapistRoutes');
 const sleepRoutes = require('./routes/sleepRoutes');
 const todoRoutes = require('./routes/todoRoutes');
@@ -27,6 +31,10 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes ✅ (ALL routes must be here)
 app.use('/api/users', userRoutes);
+app.use('/api/sleep', sleepRoutes);
+app.use('/api/todos', todoRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/streaks', streakRoutes);
 app.use('/api/therapists', therapistRoutes);
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
