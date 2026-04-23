@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { 
-    LayoutDashboard, 
-    ListTodo, 
-    BellRing, 
-    Moon, 
-    Smile, 
-    Stethoscope, 
-    CalendarPlus, 
-    CalendarDays, 
+import {
+    LayoutDashboard,
+    ListTodo,
+    BellRing,
+    Moon,
+    Smile,
+    Stethoscope,
+    CalendarPlus,
+    CalendarDays,
     Users,
     Activity
 } from 'lucide-react';
@@ -20,14 +20,14 @@ function cn(...inputs) {
 }
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
-    
+
     const sections = [
         {
             title: 'Daily Tracking',
             items: [
                 { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
                 { name: 'To-Do List', path: '/todo', icon: ListTodo },
-                { name: 'Reminders', path: '/reminders', icon: BellRing },
+                { name: 'Medicine Reminders', path: '/reminders', icon: BellRing },
                 { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
                 { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
             ]
@@ -55,7 +55,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
     };
 
     return (
-        <aside 
+        <aside
             className={cn(
                 "fixed inset-y-0 left-0 z-30 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col",
                 "md:relative md:translate-x-0",
@@ -88,8 +88,8 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                                             onClick={closeSidebarMobile}
                                             className={({ isActive }) => cn(
                                                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
-                                                isActive 
-                                                    ? "bg-blue-50 text-blue-700 font-medium" 
+                                                isActive
+                                                    ? "bg-blue-50 text-blue-700 font-medium"
                                                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                             )}
                                             title={isCollapsed ? item.name : undefined}
