@@ -10,7 +10,8 @@ import {
     CalendarDays,
     Users,
     Activity,
-    ShieldAlert
+    ShieldAlert,
+    BookOpen
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -31,6 +32,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                 { name: 'Medicine Reminders', path: '/reminders', icon: BellRing },
                 { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
                 { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
+                { name: 'Study Tracker', path: '/study-tracker', icon: BookOpen },
             ]
         },
         {

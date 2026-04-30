@@ -13,6 +13,7 @@ import MyAppointments from './pages/MyAppointments';
 import MoodTracker from './pages/MoodTracker';
 import Friends from './pages/Friends';
 import EmergencyContacts from './pages/EmergencyContacts';
+import StudyTracker from './pages/StudyTracker';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/my-appointments" element={<MyAppointments />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/emergency-contacts" element={<EmergencyContacts />} />
+          <Route path="/study-tracker" element={<StudyTracker />} />
         </Routes>
       </Layout>
     </Router>
