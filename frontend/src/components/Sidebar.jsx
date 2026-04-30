@@ -9,7 +9,8 @@ import {
     CalendarPlus,
     CalendarDays,
     Users,
-    Activity
+    Activity,
+    ShieldAlert
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -44,6 +45,12 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
             title: 'Social',
             items: [
                 { name: 'Friends', path: '/friends', icon: Users },
+            ]
+        },
+        {
+            title: 'Safety',
+            items: [
+                { name: 'Emergency Contacts', path: '/emergency-contacts', icon: ShieldAlert },
             ]
         }
     ];

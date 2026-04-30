@@ -20,6 +20,10 @@ dotenv.config();
 // Connect DB
 connectDB();
 
+// Start Background Jobs
+const startEmergencyAlertJob = require('./cron/emergencyAlertJob');
+startEmergencyAlertJob();
+
 const app = express();
 
 // Middleware

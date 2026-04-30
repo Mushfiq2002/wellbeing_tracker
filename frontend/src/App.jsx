@@ -12,6 +12,7 @@ import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
 import MoodTracker from './pages/MoodTracker';
 import Friends from './pages/Friends';
+import EmergencyContacts from './pages/EmergencyContacts';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/book/:id" element={<BookAppointment />} />
           <Route path="/my-appointments" element={<MyAppointments />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/emergency-contacts" element={<EmergencyContacts />} />
         </Routes>
       </Layout>
     </Router>
