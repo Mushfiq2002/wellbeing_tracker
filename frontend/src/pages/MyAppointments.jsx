@@ -13,7 +13,7 @@ const MyAppointments = () => {
     const fetchAppointments = async () => {
       try {
         const { data } = await axios.get(
-          'http://localhost:5000/api/appointments/my',
+          'http://localhost:8000/api/appointments/my',
           {
             headers: {
               Authorization: `Bearer ${userInfo.token}`,
@@ -39,7 +39,7 @@ const MyAppointments = () => {
   const handleCancel = async (id) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/appointments/${id}/cancel`,
+        `http://localhost:8000/api/appointments/${id}/cancel`,
         {},
         {
           headers: {

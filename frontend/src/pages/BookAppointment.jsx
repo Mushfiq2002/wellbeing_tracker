@@ -29,7 +29,7 @@ const BookAppointment = () => {
 
     const fetchTherapists = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/therapists');
+        const { data } = await axios.get('http://localhost:8000/api/therapists');
         setTherapists(data || []);
       } catch (error) {
         console.error('Error fetching therapists:', error);
@@ -62,7 +62,7 @@ const BookAppointment = () => {
       setLoading(true);
 
       await axios.post(
-        'http://localhost:5000/api/appointments',
+        'http://localhost:8000/api/appointments',
         formData,
         {
           headers: {
