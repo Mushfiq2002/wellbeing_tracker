@@ -14,6 +14,7 @@ const medicineRoutes = require('./routes/medicineRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const friendRoutes = require('./routes/friendRoutes');
 const moodRoutes = require('./routes/moodRoutes');
+const studyRoutes = require('./routes/studyRoutes');
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use('/api/medicines', medicineRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/moods', moodRoutes);
+app.use('/api/study', studyRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
