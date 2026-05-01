@@ -12,10 +12,10 @@ const MyAppointments = () => {
     JSON.parse(localStorage.getItem('user')) ||
     JSON.parse(localStorage.getItem('userInfo'));
 
-<<<<<<< HEAD
+ HEAD
   const formatTime = (time) => {
     if (!time) return 'N/A';
-=======
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -27,7 +27,7 @@ const MyAppointments = () => {
             },
           }
         );
->>>>>>> cd956fb85002168a01eb2e6a976b7d4a1ab5a50c
+ cd956fb85002168a01eb2e6a976b7d4a1ab5a50c
 
     const [hour, minute] = time.split(':');
     let h = parseInt(hour, 10);
