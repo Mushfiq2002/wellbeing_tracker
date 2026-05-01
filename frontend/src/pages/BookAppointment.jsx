@@ -35,7 +35,7 @@ const BookAppointment = () => {
 
     const fetchTherapists = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/therapists');
+        const { data } = await axios.get('http://localhost:8000/api/therapists');
         setTherapists(data || []);
       } catch (error) {
         console.error('Error fetching therapists:', error);
@@ -67,12 +67,25 @@ const BookAppointment = () => {
     try {
       setLoading(true);
 
+<<<<<<< HEAD
       await axios.post('http://localhost:5000/api/appointments', formData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userInfo.token}`,
         },
       });
+=======
+      await axios.post(
+        'http://localhost:8000/api/appointments',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+>>>>>>> cd956fb85002168a01eb2e6a976b7d4a1ab5a50c
 
       alert('Appointment booked successfully');
       navigate('/my-appointments');

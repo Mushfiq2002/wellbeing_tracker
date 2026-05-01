@@ -5,16 +5,25 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 const userRoutes = require('./routes/userRoutes');
-const therapistRoutes = require('./routes/therapistRoutes');
 const sleepRoutes = require('./routes/sleepRoutes');
 const todoRoutes = require('./routes/todoRoutes');
+const calendarRoutes = require('./routes/calendarRoutes');
+const streakRoutes = require('./routes/streakRoutes');
+const therapistRoutes = require('./routes/therapistRoutes');
 const medicineRoutes = require('./routes/medicineRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const friendRoutes = require('./routes/friendRoutes');
+const moodRoutes = require('./routes/moodRoutes');
+const studyRoutes = require('./routes/studyRoutes');
 
 dotenv.config();
 
 // Connect DB
 connectDB();
+
+// Start Background Jobs
+const startEmergencyAlertJob = require('./cron/emergencyAlertJob');
+startEmergencyAlertJob();
 
 const app = express();
 
@@ -25,12 +34,16 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes ✅ (ALL routes must be here)
 app.use('/api/users', userRoutes);
-app.use('/api/therapists', therapistRoutes);
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/streaks', streakRoutes);
+app.use('/api/therapists', therapistRoutes);
 app.use('/api/medicines', medicineRoutes);
-
-app.use('/api/appointments', require('./routes/appointmentRoutes'));
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/moods', moodRoutes);
+app.use('/api/study', studyRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

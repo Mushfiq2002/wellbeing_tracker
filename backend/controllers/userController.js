@@ -76,6 +76,12 @@ const loginUser = async (req, res, next) => {
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
+            // Update login info for Emergency Alert System
+            user.lastLogin = Date.now();
+            user.warningEmailSentAt = null;
+            user.emergencyAlertSentAt = null;
+            await user.save();
+
             res.json({
                 _id: user.id,
                 name: user.name,
@@ -92,8 +98,109 @@ const loginUser = async (req, res, next) => {
     }
 };
 
+// @desc    Get emergency contacts
+// @route   GET /api/users/emergency-contacts
+// @access  Private
+const getEmergencyContacts = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+        res.status(200).json(user.emergencyContacts);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Add an emergency contact
+// @route   POST /api/users/emergency-contacts
+// @access  Private
+const addEmergencyContact = async (req, res, next) => {
+    try {
+        const { name, email, relation } = req.body;
+        if (!name || !email || !relation) {
+            res.status(400);
+            throw new Error('Please add all fields');
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        user.emergencyContacts.push({ name, email, relation });
+        await user.save();
+        res.status(201).json(user.emergencyContacts);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Update an emergency contact
+// @route   PUT /api/users/emergency-contacts/:contactId
+// @access  Private
+const updateEmergencyContact = async (req, res, next) => {
+    try {
+        const { name, email, relation } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        const contact = user.emergencyContacts.id(req.params.contactId);
+        if (!contact) {
+            res.status(404);
+            throw new Error('Contact not found');
+        }
+
+        if (name) contact.name = name;
+        if (email) contact.email = email;
+        if (relation) contact.relation = relation;
+
+        await user.save();
+        res.status(200).json(user.emergencyContacts);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Remove an emergency contact
+// @route   DELETE /api/users/emergency-contacts/:contactId
+// @access  Private
+const removeEmergencyContact = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        const contact = user.emergencyContacts.id(req.params.contactId);
+        if (!contact) {
+            res.status(404);
+            throw new Error('Contact not found');
+        }
+
+        user.emergencyContacts.pull(req.params.contactId);
+        await user.save();
+        res.status(200).json(user.emergencyContacts);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getUsers,
     registerUser,
     loginUser,
+    getEmergencyContacts,
+    addEmergencyContact,
+    updateEmergencyContact,
+    removeEmergencyContact,
 };

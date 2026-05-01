@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 
@@ -20,9 +19,12 @@ const Dashboard = () => {
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
               Hello, {user?.name}!
             </h2>
+<<<<<<< HEAD
             <p className="text-gray-600">
               You are logged in as a <strong>{user?.role}</strong>.
             </p>
+=======
+>>>>>>> cd956fb85002168a01eb2e6a976b7d4a1ab5a50c
           </div>
         </CardContent>
       </Card>
