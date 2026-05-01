@@ -29,14 +29,76 @@ const appointmentSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'cancelled'],
+      enum: [
+        'pending',
+        'missed',
+        'review_pending',
+        'completed',
+        'cancelled',
+      ],
       default: 'pending',
+    },
+
+    sessionRoomId: {
+      type: String,
+      default: '',
     },
     meetingLink: {
       type: String,
       default: '',
+    },
+
+    sessionStarted: {
+      type: Boolean,
+      default: false,
+    },
+    sessionStartedAt: {
+      type: Date,
+      default: null,
+    },
+    sessionEndedAt: {
+      type: Date,
+      default: null,
+    },
+
+    // therapist manually marks offline/online attendance
+    therapistMarked: {
+      type: Boolean,
+      default: false,
+    },
+    therapistMarkedStatus: {
+      type: String,
+      enum: ['done', 'missed', ''],
+      default: '',
+    },
+    therapistMarkedAt: {
+      type: Date,
+      default: null,
+    },
+
+    isReviewed: {
+      type: Boolean,
+      default: false,
+    },
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
+
+    discountApplied: {
+      type: Boolean,
+      default: false,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+    finalFee: {
+      type: Number,
+      default: 0,
     },
   },
   {

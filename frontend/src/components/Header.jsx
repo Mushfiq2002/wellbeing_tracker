@@ -1,88 +1,155 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 
 const Header = () => {
-    const dispatch = useDispatch();
-    const { isAuthenticated } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const location = useLocation();
 
-    const handleLogout = () => {
-        dispatch(logout());
-    };
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-    return (
-        <header className="bg-white shadow">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                
-                <Link to="/" className="text-2xl font-bold text-primary-500">
-                    Wellbeing Tracker
-                </Link>
+  const localUser =
+    JSON.parse(localStorage.getItem('user')) ||
+    JSON.parse(localStorage.getItem('userInfo'));
 
-                <nav>
-                    <ul className="flex space-x-6 items-center">
-                        
-                        <li>
-                            <Link to="/" className="text-gray-700 hover:text-blue-600">
-                                Home
-                            </Link>
-                        </li>
+  const currentUser = user || localUser;
 
-                        {isAuthenticated ? (
-                            <li className="flex items-center space-x-4">
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
-                                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">
-                                    Dashboard
-                                </Link>
+  const linkClass = (path) =>
+    `font-medium transition duration-200 ${
+      location.pathname === path
+        ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+        : 'text-gray-600 hover:text-blue-600'
+    }`;
 
-                                <Link to="/todo" className="text-gray-700 hover:text-blue-600">
-                                    To-Do List
-                                </Link>
+  return (
+    <header className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <Link to="/" className="text-2xl font-bold text-blue-600">
+          Wellbeing Tracker
+        </Link>
 
-                                <Link to="/reminders" className="text-gray-700 hover:text-blue-600">
-                                    Reminders
-                                </Link>
+        <nav>
+          <ul className="flex items-center space-x-6 text-sm md:text-base">
+            <li>
+              <Link to="/" className={linkClass('/')}>
+                Home
+              </Link>
+            </li>
 
-                                <Link to="/sleep-tracker" className="text-gray-700 hover:text-indigo-600">
-                                    Sleep Tracker
-                                </Link>
+            {isAuthenticated ? (
+              <>
+                <li>
+                  <Link to="/dashboard" className={linkClass('/dashboard')}>
+                    Dashboard
+                  </Link>
+                </li>
 
-                                {/* 🔥 ADD THIS */}
-                                <Link to="/therapists" className="text-gray-700 hover:text-blue-600">
-                                    Therapists
-                                </Link>
+                <li>
+                  <Link to="/todo" className={linkClass('/todo')}>
+                    To-Do List
+                  </Link>
+                </li>
 
-                                {/* 🔥 MOST IMPORTANT */}
-                                <Link to="/book-appointment" className="text-blue-600 font-semibold">
-                                    Book Appointment
-                                </Link>
+                <li>
+                  <Link to="/reminders" className={linkClass('/reminders')}>
+                    Reminders
+                  </Link>
+                </li>
 
-                                <Link to="/my-appointments" className="text-gray-700 hover:text-blue-600">
-                                    My Appointments
-                                </Link>
+                <li>
+                  <Link
+                    to="/sleep-tracker"
+                    className={linkClass('/sleep-tracker')}
+                  >
+                    Sleep Tracker
+                  </Link>
+                </li>
 
-                                <button 
-                                    onClick={handleLogout} 
-                                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm"
-                                >
-                                    Logout
-                                </button>
-                            </li>
-                        ) : (
-                            <li className="flex items-center space-x-4">
-                                <Link to="/login" className="text-gray-700 hover:text-blue-600">
-                                    Login
-                                </Link>
+                {currentUser?.role === 'therapist' ? (
+                  <li>
+                    <Link
+                      to="/therapist-appointments"
+                      className={linkClass('/therapist-appointments')}
+                    >
+                      Therapist Panel
+                    </Link>
+                  </li>
+                ) : (
+                  <>
+                    <li>
+                      <Link
+                        to="/therapists"
+                        className={linkClass('/therapists')}
+                      >
+                        Therapists
+                      </Link>
+                    </li>
 
-                                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
-                                    Sign Up
-                                </Link>
-                            </li>
-                        )}
-                    </ul>
-                </nav>
-            </div>
-        </header>
-    );
+                    <li>
+                      <Link
+                        to="/book-appointment"
+                        className={linkClass('/book-appointment')}
+                      >
+                        Book Appointment
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link
+                        to="/my-appointments"
+                        className={linkClass('/my-appointments')}
+                      >
+                        My Appointments
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link
+                        to="/review-rating"
+                        className={linkClass('/review-rating')}
+                      >
+                        Review & Rating
+                      </Link>
+                    </li>
+                  </>
+                )}
+
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-medium text-sm"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/login" className={linkClass('/login')}>
+                    Login
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/register"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm"
+                  >
+                    Sign Up
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
 };
 
 export default Header;
