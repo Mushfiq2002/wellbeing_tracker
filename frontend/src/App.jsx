@@ -24,6 +24,10 @@ import MoodTracker from './pages/MoodTracker';
 import Friends from './pages/Friends';
 import EmergencyContacts from './pages/EmergencyContacts';
 import StudyTracker from './pages/StudyTracker';
+import Calendar from './pages/Calendar';
+import StreakTracker from './pages/StreakTracker';
+import DailyCheckin from './pages/DailyCheckin';
+import CustomReminder from './pages/CustomReminder';
 import GoalTracker from './components/ui/GoalTracker';
 
 // 🔥 Payment imports
@@ -59,6 +63,10 @@ function App() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/emergency-contacts" element={<EmergencyContacts />} />
           <Route path="/study-tracker" element={<StudyTracker />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/streak-tracker" element={<StreakTracker />} />
+          <Route path="/daily-checkin" element={<DailyCheckin />} />
+          <Route path="/custom-reminders" element={<CustomReminder />} />
           <Route path="/goal-tracker" element={<GoalTracker />} />
           {/* 🔥 Payment routes */}
           <Route path="/payments" element={<Payments />} />
