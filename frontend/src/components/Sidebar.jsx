@@ -1,117 +1,115 @@
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
-    LayoutDashboard,
-    ListTodo,
-    BellRing,
-    Moon,
-    Smile,
-    Stethoscope,
-    CalendarPlus,
-    CalendarDays,
-    Users,
-    Activity
+  LayoutDashboard,
+  ListTodo,
+  BellRing,
+  Moon,
+  Smile,
+  Stethoscope,
+  CalendarPlus,
+  CalendarDays,
+  Users,
+  Activity,
+  ShieldAlert,
+  BookOpen,
+  Star,
+  Target,
+  CreditCard,
 } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-// Helper for conditional tailwind classes
-function cn(...inputs) {
-    return twMerge(clsx(inputs));
-}
 
 const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
+  const location = useLocation();
+  const { user } = useSelector((state) => state.auth);
 
-    const sections = [
+  const role = user?.role;
+
+  const sections = [
+    {
+      title: 'Daily Tracking',
+      items: [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'To-Do List', path: '/todo', icon: ListTodo },
+        { name: 'Medicine Reminders', path: '/reminders', icon: BellRing },
+        { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
+        { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
+        { name: 'Study Tracker', path: '/study-tracker', icon: BookOpen },
+        { name: 'Goal Tracker', path: '/goal-tracker', icon: Target },
+      ],
+    },
+    {
+      title: 'Health & Therapy',
+      items: [
+        { name: 'Therapists', path: '/therapists', icon: Stethoscope },
+        { name: 'Book Appointment', path: '/book-appointment', icon: CalendarPlus },
+        { name: 'My Appointments', path: '/my-appointments', icon: CalendarDays },
+        { name: 'Payment', path: '/payments', icon: CreditCard },
+        { name: 'Review & Ratings', path: '/review-rating', icon: Star },
+
+        ...(role === 'therapist'
+          ? [
+            {
+              name: 'Therapist Dashboard',
+              path: '/therapist-appointments',
+              icon: Activity,
+            },
+          ]
+          : []),
+      ],
+    },
+    {
+      title: 'Social',
+      items: [{ name: 'Friends', path: '/friends', icon: Users }],
+    },
+    {
+      title: 'Safety',
+      items: [
         {
-            title: 'Daily Tracking',
-            items: [
-                { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-                { name: 'To-Do List', path: '/todo', icon: ListTodo },
-                { name: 'Medicine Reminders', path: '/reminders', icon: BellRing },
-                { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
-                { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
-            ]
+          name: 'Emergency Contacts',
+          path: '/emergency-contacts',
+          icon: ShieldAlert,
         },
-        {
-            title: 'Health & Therapy',
-            items: [
-                { name: 'Therapists', path: '/therapists', icon: Stethoscope },
-                { name: 'Book Appointment', path: '/book-appointment', icon: CalendarPlus },
-                { name: 'My Appointments', path: '/my-appointments', icon: CalendarDays },
-            ]
-        },
-        {
-            title: 'Social',
-            items: [
-                { name: 'Friends', path: '/friends', icon: Users },
-            ]
-        }
-    ];
+      ],
+    },
+  ];
 
-    const closeSidebarMobile = () => {
-        if (window.innerWidth < 768) { // md breakpoint in tailwind
-            setIsOpen(false);
-        }
-    };
+  const linkClass = (path) =>
+    `flex items-center gap-2 px-3 py-2 rounded-md transition ${location.pathname === path || location.pathname.startsWith(`${path}/`)
+      ? 'bg-blue-100 text-blue-600'
+      : 'text-gray-600 hover:bg-gray-100'
+    }`;
 
-    return (
-        <aside
-            className={cn(
-                "fixed inset-y-0 left-0 z-30 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col",
-                "md:relative md:translate-x-0",
-                isOpen ? "translate-x-0" : "-translate-x-full",
-                isCollapsed ? "md:w-20" : "md:w-64 w-64"
-            )}
-        >
-            <div className="flex h-16 shrink-0 items-center justify-center border-b border-gray-200 px-4">
-                <Activity className="h-8 w-8 text-primary-500 text-blue-600" />
-                {!isCollapsed && (
-                    <span className="ml-3 text-xl font-bold text-gray-900 truncate">Wellbeing</span>
-                )}
-            </div>
+  return (
+    <div className={`fixed inset-y-0 left-0 z-30 bg-white border-r h-full p-4 overflow-y-auto transition-all duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 ${isCollapsed ? 'w-20 items-center flex flex-col' : 'w-64'}`}>
+      {sections.map((section, idx) => (
+        <div key={idx} className="mb-6 w-full">
+          {!isCollapsed && (
+            <h3 className="text-sm font-semibold text-gray-500 mb-2 whitespace-nowrap">
+              {section.title}
+            </h3>
+          )}
 
-            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {sections.map((section, idx) => (
-                    <div key={idx}>
-                        {!isCollapsed && (
-                            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {section.title}
-                            </h3>
-                        )}
-                        <ul className="space-y-1">
-                            {section.items.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <li key={item.name}>
-                                        <NavLink
-                                            to={item.path}
-                                            onClick={closeSidebarMobile}
-                                            className={({ isActive }) => cn(
-                                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
-                                                isActive
-                                                    ? "bg-blue-50 text-blue-700 font-medium"
-                                                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                            )}
-                                            title={isCollapsed ? item.name : undefined}
-                                        >
-                                            <Icon className={cn(
-                                                "h-5 w-5 shrink-0 transition-colors",
-                                                "group-hover:text-blue-600",
-                                                isCollapsed && "mx-auto"
-                                            )} />
-                                            {!isCollapsed && (
-                                                <span className="truncate">{item.name}</span>
-                                            )}
-                                        </NavLink>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
-                ))}
-            </nav>
-        </aside>
-    );
+          <div className="space-y-1 w-full">
+            {section.items.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <Link 
+                  key={index} 
+                  to={item.path} 
+                  className={`${linkClass(item.path)} ${isCollapsed ? 'justify-center px-0' : ''}`}
+                  title={isCollapsed ? item.name : undefined}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {!isCollapsed && <span className="whitespace-nowrap">{item.name}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default Sidebar;
