@@ -1,12 +1,11 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
-import { Menu, PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen, LogOut, Activity } from 'lucide-react';
 
 const Header = ({ toggleSidebar, toggleCollapse, isSidebarCollapsed }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -16,13 +15,6 @@ const Header = ({ toggleSidebar, toggleCollapse, isSidebarCollapsed }) => {
     dispatch(logout());
     navigate('/');
   };
-
-  const linkClass = (path) =>
-    `font-medium transition duration-200 ${
-      location.pathname === path
-        ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
-        : 'text-gray-600 hover:text-blue-600'
-    }`;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 z-10 sticky top-0">
@@ -48,13 +40,20 @@ const Header = ({ toggleSidebar, toggleCollapse, isSidebarCollapsed }) => {
                 )}
               </button>
 
-              <Link to="/" className="text-xl font-bold text-primary-500 md:hidden">
-                WT
+              <Link to="/" className="flex items-center gap-2 text-primary-500">
+                <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+                  <Activity className="h-5 w-5" />
+                </div>
+                <span className="text-xl font-bold md:hidden">WT</span>
+                <span className="text-xl font-bold hidden md:block">Wellbeing Tracker</span>
               </Link>
             </>
           ) : (
-            <Link to="/" className="text-2xl font-bold text-primary-500">
-              Wellbeing Tracker
+            <Link to="/" className="flex items-center gap-2 text-primary-500">
+              <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+                <Activity className="h-6 w-6" />
+              </div>
+              <span className="text-2xl font-bold">Wellbeing Tracker</span>
             </Link>
           )}
         </div>
@@ -63,30 +62,6 @@ const Header = ({ toggleSidebar, toggleCollapse, isSidebarCollapsed }) => {
           <ul className="flex items-center space-x-4">
             {loggedIn ? (
               <>
-                <li><Link to="/" className={linkClass('/')}>Home</Link></li>
-                <li><Link to="/dashboard" className={linkClass('/dashboard')}>Dashboard</Link></li>
-                <li><Link to="/todo" className={linkClass('/todo')}>To-Do</Link></li>
-                <li><Link to="/reminders" className={linkClass('/reminders')}>Reminders</Link></li>
-                <li><Link to="/sleep-tracker" className={linkClass('/sleep-tracker')}>Sleep</Link></li>
-
-                {user?.role === 'therapist' ? (
-                  <li>
-                    <Link
-                      to="/therapist-appointments"
-                      className={linkClass('/therapist-appointments')}
-                    >
-                      Therapist Panel
-                    </Link>
-                  </li>
-                ) : (
-                  <>
-                    <li><Link to="/therapists" className={linkClass('/therapists')}>Therapists</Link></li>
-                    <li><Link to="/book-appointment" className={linkClass('/book-appointment')}>Book</Link></li>
-                    <li><Link to="/my-appointments" className={linkClass('/my-appointments')}>My Appointments</Link></li>
-                    <li><Link to="/review-rating" className={linkClass('/review-rating')}>Reviews</Link></li>
-                  </>
-                )}
-
                 <li className="flex items-center gap-2">
                   <span className="text-sm hidden sm:block">
                     {user?.name || 'User'}

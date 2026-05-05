@@ -18,7 +18,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
 
@@ -80,21 +80,28 @@ const Sidebar = () => {
     }`;
 
   return (
-    <div className="w-64 bg-white border-r h-full p-4 overflow-y-auto">
+    <div className={`fixed inset-y-0 left-0 z-30 bg-white border-r h-full p-4 overflow-y-auto transition-all duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 ${isCollapsed ? 'w-20 items-center flex flex-col' : 'w-64'}`}>
       {sections.map((section, idx) => (
-        <div key={idx} className="mb-6">
-          <h3 className="text-sm font-semibold text-gray-500 mb-2">
-            {section.title}
-          </h3>
+        <div key={idx} className="mb-6 w-full">
+          {!isCollapsed && (
+            <h3 className="text-sm font-semibold text-gray-500 mb-2 whitespace-nowrap">
+              {section.title}
+            </h3>
+          )}
 
-          <div className="space-y-1">
+          <div className="space-y-1 w-full">
             {section.items.map((item, index) => {
               const Icon = item.icon;
 
               return (
-                <Link key={index} to={item.path} className={linkClass(item.path)}>
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
+                <Link 
+                  key={index} 
+                  to={item.path} 
+                  className={`${linkClass(item.path)} ${isCollapsed ? 'justify-center px-0' : ''}`}
+                  title={isCollapsed ? item.name : undefined}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {!isCollapsed && <span className="whitespace-nowrap">{item.name}</span>}
                 </Link>
               );
             })}
