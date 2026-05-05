@@ -7,24 +7,29 @@ const appointmentSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+
     therapist: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'Therapist',
     },
+
     appointmentDate: {
       type: Date,
       required: true,
     },
+
     timeSlot: {
       type: String,
       required: true,
     },
+
     modeOfSession: {
       type: String,
       enum: ['online', 'offline'],
       default: 'online',
     },
+
     notes: {
       type: String,
       default: '',
@@ -46,6 +51,7 @@ const appointmentSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+
     meetingLink: {
       type: String,
       default: '',
@@ -55,25 +61,38 @@ const appointmentSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
     sessionStartedAt: {
       type: Date,
       default: null,
     },
+
     sessionEndedAt: {
       type: Date,
       default: null,
     },
 
-    // therapist manually marks offline/online attendance
+    userJoined: {
+      type: Boolean,
+      default: false,
+    },
+
+    userJoinedAt: {
+      type: Date,
+      default: null,
+    },
+
     therapistMarked: {
       type: Boolean,
       default: false,
     },
+
     therapistMarkedStatus: {
       type: String,
       enum: ['done', 'missed', ''],
       default: '',
     },
+
     therapistMarkedAt: {
       type: Date,
       default: null,
@@ -83,19 +102,34 @@ const appointmentSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
     reviewedAt: {
       type: Date,
       default: null,
+    },
+
+    // PAYMENT DATA
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'paid'],
+      default: 'unpaid',
+    },
+
+    originalFee: {
+      type: Number,
+      default: 0,
     },
 
     discountApplied: {
       type: Boolean,
       default: false,
     },
+
     discountAmount: {
       type: Number,
       default: 0,
     },
+
     finalFee: {
       type: Number,
       default: 0,

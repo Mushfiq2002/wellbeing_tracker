@@ -6,17 +6,22 @@ const {
   createTherapist,
   submitTherapistReview,
   deleteTherapist,
+  getMyTherapistProfile,
 } = require('../controllers/therapistController');
 
 const { protect } = require('../middleware/authMiddleware');
 
-// Get + Create
-router.route('/').get(getTherapists).post(createTherapist);
+// 🔥 Get all therapists (user side)
+router.get('/', getTherapists);
 
-// 🔥 NEW: Submit review (LOGIN REQUIRED)
+// 🔥 Create therapist
+router.post('/', createTherapist);
+
+// 🔥 Submit review (login required)
 router.post('/:id/reviews', protect, submitTherapistReview);
 
-// Delete
-router.route('/:id').delete(deleteTherapist);
+// 🔥 Delete therapist
+router.delete('/:id', deleteTherapist);
+router.get('/me/profile', protect, getMyTherapistProfile);
 
 module.exports = router;

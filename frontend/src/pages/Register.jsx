@@ -15,13 +15,17 @@ const Register = () => {
     password: '',
     role: 'user',
   });
+
   const [error, setError] = useState('');
-  
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ 
+      ...formData, 
+      [e.target.name]: e.target.value 
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -29,14 +33,19 @@ const Register = () => {
     setError('');
 
     try {
-      const response = await axiosInstance.post('/users', formData);
-      if (response.data) {
-        localStorage.setItem('user', JSON.stringify(response.data));
-        dispatch(login(response.data));
+      const { data } = await axiosInstance.post('/users', formData);
+
+      if (data?.token) {
+        localStorage.setItem('user', JSON.stringify(data));
+        localStorage.removeItem('userInfo');
+
+        dispatch(login(data));
         navigate('/dashboard');
+      } else {
+        setError('Registration failed. Invalid server response.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to register');
+      setError(err?.response?.data?.message || 'Failed to register');
     }
   };
 
@@ -47,17 +56,23 @@ const Register = () => {
           <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
             Create an Account
           </CardTitle>
-          <p className="text-sm text-gray-500 mt-2">Join us to start your wellbeing journey</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Join us to start your wellbeing journey
+          </p>
         </CardHeader>
+
         <CardContent className="pt-8">
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-6 text-sm flex items-center">
-              <span className="font-medium">{error}</span>
+            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-6 text-sm">
+              {error}
             </div>
           )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-700">Full Name</Label>
+              <Label htmlFor="name" className="text-gray-700">
+                Full Name
+              </Label>
               <Input
                 id="name"
                 name="name"
@@ -69,8 +84,11 @@ const Register = () => {
                 className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700">Email Address</Label>
+              <Label htmlFor="email" className="text-gray-700">
+                Email Address
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -82,8 +100,11 @@ const Register = () => {
                 className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-700">Password</Label>
+              <Label htmlFor="password" className="text-gray-700">
+                Password
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -95,8 +116,11 @@ const Register = () => {
                 className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-gray-700">Account Type</Label>
+              <Label htmlFor="role" className="text-gray-700">
+                Account Type
+              </Label>
               <select
                 id="role"
                 name="role"
@@ -108,13 +132,21 @@ const Register = () => {
                 <option value="therapist">Therapist</option>
               </select>
             </div>
-            <Button type="submit" className="w-full h-11 text-base font-semibold bg-blue-600 hover:bg-blue-700 mt-4 transition-all">
+
+            <Button
+              type="submit"
+              className="w-full h-11 text-base font-semibold bg-blue-600 hover:bg-blue-700 mt-4 transition-all"
+            >
               Sign Up
             </Button>
           </form>
+
           <div className="mt-8 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <button onClick={() => navigate('/login')} className="text-blue-600 font-medium hover:underline focus:outline-none">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-blue-600 font-medium hover:underline focus:outline-none"
+            >
               Log in
             </button>
           </div>

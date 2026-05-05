@@ -24,6 +24,10 @@ import Friends from './pages/Friends';
 import EmergencyContacts from './pages/EmergencyContacts';
 import StudyTracker from './pages/StudyTracker';
 
+// 🔥 Payment imports
+import Payment from './pages/Payment';
+import Payments from './pages/Payments';
+
 function App() {
   return (
     <Router>
@@ -40,7 +44,7 @@ function App() {
           <Route path="/my-appointments" element={<MyAppointments />} />
 
           <Route path="/review-rating" element={<ReviewRating />} />
-          <Route path="/review/:appointmentId" element={<ReviewTherapist />} />
+          <Route path="/review/:therapistId" element={<ReviewTherapist />} />
 
           <Route path="/therapist-appointments" element={<TherapistAppointments />} />
           <Route path="/session/:roomId" element={<OnlineSession />} />
@@ -53,6 +57,10 @@ function App() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/emergency-contacts" element={<EmergencyContacts />} />
           <Route path="/study-tracker" element={<StudyTracker />} />
+
+          {/* 🔥 Payment routes */}
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/payment/:id" element={<Payment />} />
         </Routes>
       </Layout>
     </Router>

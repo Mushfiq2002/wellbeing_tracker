@@ -1,72 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../services/axiosInstance';
+import { useSelector } from 'react-redux';
 
 const MyAppointments = () => {
   const navigate = useNavigate();
+  const { user: reduxUser } = useSelector((state) => state.auth);
+
+  const user =
+    reduxUser ||
+    JSON.parse(localStorage.getItem('user')) ||
+    JSON.parse(localStorage.getItem('userInfo'));
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const userInfo =
-    JSON.parse(localStorage.getItem('user')) ||
-    JSON.parse(localStorage.getItem('userInfo'));
-
- HEAD
   const formatTime = (time) => {
     if (!time) return 'N/A';
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data } = await axios.get(
-          'http://localhost:8000/api/appointments/my',
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
- cd956fb85002168a01eb2e6a976b7d4a1ab5a50c
-
-    const [hour, minute] = time.split(':');
+    const [hour, minute = '00'] = time.split(':');
     let h = parseInt(hour, 10);
     const ampm = h >= 12 ? 'PM' : 'AM';
 
-    h = h % 12;
-    if (h === 0) h = 12;
+    h = h % 12 || 12;
 
     return `${h}:${minute} ${ampm}`;
   };
 
-  const getStatusStyle = (status) => {
-    if (status === 'pending') return 'text-yellow-600 bg-yellow-100';
-    if (status === 'missed') return 'text-red-600 bg-red-100';
-    if (status === 'review_pending') return 'text-blue-600 bg-blue-100';
-    if (status === 'completed') return 'text-green-600 bg-green-100';
-    if (status === 'cancelled') return 'text-gray-600 bg-gray-100';
-    return 'text-gray-600 bg-gray-100';
-  };
-
-  const getStatusText = (status) => {
+  const statusText = (status) => {
     if (status === 'pending') return 'Pending';
     if (status === 'missed') return 'Missed';
     if (status === 'review_pending') return 'Review Pending';
     if (status === 'completed') return 'Completed';
     if (status === 'cancelled') return 'Cancelled';
-    return status || 'Pending';
+
+    return status;
+  };
+
+  const canJoin = (appointment) => {
+    if (!appointment?.appointmentDate || !appointment?.timeSlot) return false;
+
+    const start = new Date(appointment.appointmentDate);
+    const [h, m = '00'] = appointment.timeSlot.split(':');
+
+    start.setHours(parseInt(h, 10));
+    start.setMinutes(parseInt(m, 10));
+    start.setSeconds(0);
+    start.setMilliseconds(0);
+
+    const now = new Date();
+
+    return now >= start;
   };
 
   const fetchAppointments = async () => {
     try {
-      const { data } = await axios.get(
-        'http://localhost:5000/api/appointments/my',
-        {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
+      const { data } = await axiosInstance.get('/appointments/my', {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
 
       setAppointments(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -77,20 +70,23 @@ const MyAppointments = () => {
   };
 
   useEffect(() => {
-    if (userInfo?.token) fetchAppointments();
-    else setLoading(false);
+    if (user?.token) {
+      fetchAppointments();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const handleCancel = async (id) => {
     if (!window.confirm('Cancel this appointment?')) return;
 
     try {
-      await axios.put(
-        `http://localhost:8000/api/appointments/${id}/cancel`,
+      await axiosInstance.put(
+        `/appointments/${id}/cancel`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${userInfo.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
@@ -101,20 +97,16 @@ const MyAppointments = () => {
     }
   };
 
-  const handleJoin = (link) => {
-    navigate(link);
-  };
-
-  const handleReview = (appointment) => {
-    navigate(`/review/${appointment._id}`, {
+  const handleGiveReview = (appointment) => {
+    navigate(`/review/${appointment.therapist?._id}`, {
       state: {
-        appointment,
-        therapistId: appointment.therapist?._id,
+        appointmentId: appointment._id,
+        therapist: appointment.therapist,
       },
     });
   };
 
-  if (!userInfo?.token) {
+  if (!user?.token) {
     return <div className="p-6 text-center">Please login first.</div>;
   }
 
@@ -135,7 +127,7 @@ const MyAppointments = () => {
           {appointments.map((appointment) => (
             <div
               key={appointment._id}
-              className="bg-white shadow rounded-lg p-4 border"
+              className="bg-white shadow rounded-lg p-5 border"
             >
               <h2 className="text-xl font-semibold mb-2">
                 {appointment.therapist?.name || 'Therapist'}
@@ -143,9 +135,7 @@ const MyAppointments = () => {
 
               <p>
                 <b>Date:</b>{' '}
-                {appointment.appointmentDate
-                  ? appointment.appointmentDate.substring(0, 10)
-                  : 'N/A'}
+                {appointment.appointmentDate?.substring(0, 10) || 'N/A'}
               </p>
 
               <p>
@@ -153,68 +143,62 @@ const MyAppointments = () => {
               </p>
 
               <p>
-                <b>Mode:</b>{' '}
-                <span className="capitalize">
-                  {appointment.modeOfSession}
-                </span>
+                <b>Mode:</b> {appointment.modeOfSession}
               </p>
 
-              <p className="mt-2">
-                <b>Status:</b>{' '}
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(
-                    appointment.status
-                  )}`}
-                >
-                  {getStatusText(appointment.status)}
-                </span>
+              <p>
+                <b>Status:</b> {statusText(appointment.status)}
               </p>
 
-              {appointment.status === 'missed' && (
-                <p className="text-red-600 font-semibold mt-2">
-                  You missed this session.
-                </p>
-              )}
+              <p>
+                <b>Payment:</b>{' '}
+                {appointment.paymentStatus === 'paid' ? (
+                  <span className="text-green-600 font-semibold">Paid</span>
+                ) : (
+                  <span className="text-red-600 font-semibold">Unpaid</span>
+                )}
+              </p>
 
-              {appointment.status === 'review_pending' && (
-                <p className="text-blue-600 font-semibold mt-2">
-                  Session done. Please give a review to unlock 5% discount on
-                  your next appointment.
-                </p>
-              )}
-
-              {appointment.status === 'completed' && (
-                <p className="text-green-600 font-semibold mt-2">
-                  Session completed successfully.
+              {appointment.finalFee > 0 && (
+                <p>
+                  <b>Paid Amount:</b> ৳{appointment.finalFee}
                 </p>
               )}
 
               {appointment.discountApplied && (
-                <p className="text-green-600 font-semibold mt-2">
-                  5% discount applied. Saved: ৳{appointment.discountAmount}
+                <p className="text-green-600">
+                  <b>Discount Applied:</b> 5% review discount
                 </p>
               )}
 
-              {appointment.finalFee > 0 && (
-                <p>
-                  <b>Final Fee:</b> ৳{appointment.finalFee}
+              {appointment.status === 'review_pending' && (
+                <p className="mt-3 text-sm text-yellow-600">
+                  Please give a review to complete this session.
                 </p>
               )}
 
-              {appointment.notes && (
-                <p>
-                  <b>Notes:</b> {appointment.notes}
-                </p>
-              )}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {appointment.modeOfSession === 'online' &&
-                  appointment.meetingLink &&
-                  appointment.status === 'pending' &&
-                  !appointment.sessionEndedAt && (
+              <div className="mt-4 flex gap-2 flex-wrap">
+                {appointment.paymentStatus !== 'paid' &&
+                  appointment.status !== 'cancelled' && (
                     <button
-                      onClick={() => handleJoin(appointment.meetingLink)}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      onClick={() => navigate(`/payment/${appointment._id}`)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                    >
+                      Pay Now
+                    </button>
+                  )}
+
+                {appointment.modeOfSession === 'online' &&
+                  appointment.status === 'pending' &&
+                  appointment.meetingLink && (
+                    <button
+                      onClick={() => navigate(appointment.meetingLink)}
+                      disabled={!canJoin(appointment)}
+                      className={`px-4 py-2 rounded text-white ${
+                        canJoin(appointment)
+                          ? 'bg-green-600 hover:bg-green-700'
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
                     >
                       Join Session
                     </button>
@@ -222,8 +206,8 @@ const MyAppointments = () => {
 
                 {appointment.status === 'review_pending' && (
                   <button
-                    onClick={() => handleReview(appointment)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={() => handleGiveReview(appointment)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                   >
                     Give Review
                   </button>
@@ -232,10 +216,28 @@ const MyAppointments = () => {
                 {appointment.status === 'pending' && (
                   <button
                     onClick={() => handleCancel(appointment._id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
                   >
                     Cancel
                   </button>
+                )}
+
+                {appointment.status === 'completed' && (
+                  <span className="bg-green-100 text-green-700 px-4 py-2 rounded">
+                    All Complete
+                  </span>
+                )}
+
+                {appointment.status === 'missed' && (
+                  <span className="bg-red-100 text-red-700 px-4 py-2 rounded">
+                    Session Missed
+                  </span>
+                )}
+
+                {appointment.status === 'cancelled' && (
+                  <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded">
+                    Cancelled
+                  </span>
                 )}
               </div>
             </div>

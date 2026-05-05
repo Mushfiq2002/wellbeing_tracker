@@ -20,7 +20,7 @@ router.post('/', protect, createAppointment);
 router.get('/my', protect, getMyAppointments);
 
 // Therapist dashboard: next 7 days appointments
-router.get('/therapist/today', protect, getTodayTherapistAppointments);
+router.get('/therapist/week', protect, getTodayTherapistAppointments);
 
 // Session access
 router.get('/session/:roomId', protect, getSessionAccess);

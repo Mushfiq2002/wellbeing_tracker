@@ -1,28 +1,35 @@
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import axios from 'axios';
+import axiosInstance from '../services/axiosInstance';
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
   const [therapistData, setTherapistData] = useState(null);
+  const [loadingTherapist, setLoadingTherapist] = useState(false);
 
   useEffect(() => {
     const fetchTherapistData = async () => {
       try {
-        if (user?.role === 'therapist') {
-          const { data } = await axios.get('/api/therapists');
+        if (user?.role === 'therapist' && user?.token) {
+          setLoadingTherapist(true);
 
-          // 🔍 find current therapist (by linked user id)
-          const myData = data.find(
-            (t) => t.user && t.user.toString() === user._id
-          );
+          const { data } = await axiosInstance.get('/therapists/me/profile', {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          });
 
-          setTherapistData(myData);
+          setTherapistData(data);
         }
       } catch (error) {
-        console.error('Failed to load therapist data');
+        console.error(
+          error?.response?.data?.message || 'Failed to load therapist data'
+        );
+        setTherapistData(null);
+      } finally {
+        setLoadingTherapist(false);
       }
     };
 
@@ -36,6 +43,10 @@ const Dashboard = () => {
     return 'text-green-600';
   };
 
+  if (!user?.token) {
+    return <p className="text-center mt-10">Please login first.</p>;
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="shadow-lg border-0 bg-white">
@@ -47,42 +58,75 @@ const Dashboard = () => {
         </CardHeader>
 
         <CardContent className="p-8">
-
-          {/* 👤 User Info */}
           <div className="bg-blue-50 rounded-lg p-6 border border-blue-100 mb-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Hello, {user?.name}!
+              Hello, {user.name}!
             </h2>
+
             <p className="text-gray-600">
-              You are logged in as a <strong>{user?.role}</strong>.
+              You are logged in as a <strong>{user.role}</strong>.
             </p>
           </div>
 
-          {/* ⭐ Therapist Panel */}
-          {user?.role === 'therapist' && therapistData && (
+          {user.role === 'therapist' && (
             <>
-              {/* My Rating */}
-              <div className="bg-white border rounded-lg p-6 shadow mb-4">
-                <h3 className="text-xl font-semibold mb-2">My Rating</h3>
-
-                <p className={`text-2xl font-bold ${getRatingColor()}`}>
-                  ⭐ {therapistData.rating?.toFixed(1) || 0}
+              {loadingTherapist && (
+                <p className="text-gray-500 mb-4">
+                  Loading therapist rating...
                 </p>
+              )}
 
-                <p className="text-gray-500">
-                  ({therapistData.totalReviews || 0} Reviews)
-                </p>
-              </div>
+              {!loadingTherapist && therapistData && (
+                <>
+                  <div className="bg-white border rounded-lg p-6 shadow mb-4">
+                    <h3 className="text-xl font-semibold mb-2">My Rating</h3>
 
-              {/* ⚠️ Warning */}
-              {therapistData.ratingWarning && (
-                <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
-                  {therapistData.ratingWarning}
+                    <p className={`text-2xl font-bold ${getRatingColor()}`}>
+                      ⭐ {Number(therapistData.rating || 5).toFixed(1)}
+                    </p>
+
+                    <p className="text-gray-500">
+                      ({therapistData.totalReviews || 0} Reviews)
+                    </p>
+
+                    <p className="mt-2 text-sm text-gray-600">
+                      Public Status:{' '}
+                      <strong
+                        className={
+                          therapistData.isActive
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        {therapistData.isActive
+                          ? 'Visible in therapist list'
+                          : 'Removed from therapist list'}
+                      </strong>
+                    </p>
+                  </div>
+
+                  {therapistData.ratingWarning && (
+                    <div className="bg-red-100 text-red-700 p-4 rounded mb-4 border border-red-200">
+                      {therapistData.ratingWarning}
+                    </div>
+                  )}
+
+                  {therapistData.isRemovedDueToLowRating && (
+                    <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-4 border border-yellow-200">
+                      You have been removed from the public therapist list
+                      because your average rating is below 3.
+                    </div>
+                  )}
+                </>
+              )}
+
+              {!loadingTherapist && !therapistData && (
+                <div className="bg-yellow-50 text-yellow-700 p-4 rounded border border-yellow-200">
+                  Therapist profile not found for this account.
                 </div>
               )}
             </>
           )}
-
         </CardContent>
       </Card>
     </div>

@@ -1,16 +1,14 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const TherapistCard = ({ therapist }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const handleBookAppointment = () => {
-    setLoading(true);
     navigate(`/book/${therapist._id}`);
   };
 
   const latestReviews = therapist.reviews?.slice(-2).reverse() || [];
+  const rating = Number(therapist.rating || 5).toFixed(1);
 
   return (
     <div className="bg-white shadow-md rounded-xl p-6 border hover:shadow-lg transition">
@@ -24,8 +22,8 @@ const TherapistCard = ({ therapist }) => {
 
       <div className="mt-3 border-t pt-3">
         <p>
-          <b>Rating:</b> ⭐ {therapist.rating ?? 0} / 5
-          {" "}({therapist.totalReviews || 0} reviews)
+          <b>Rating:</b> ⭐ {rating} / 5{' '}
+          ({therapist.totalReviews || 0} reviews)
         </p>
 
         {latestReviews.length > 0 ? (
@@ -33,8 +31,9 @@ const TherapistCard = ({ therapist }) => {
             {latestReviews.map((review, index) => (
               <div key={index} className="bg-gray-50 p-2 rounded text-sm">
                 <p className="font-medium">
-                  {review.userName || "User"} — ⭐ {review.rating}
+                  {review.userName || 'User'} — ⭐ {review.rating}
                 </p>
+
                 {review.comment && (
                   <p className="text-gray-600 italic">"{review.comment}"</p>
                 )}
@@ -49,16 +48,10 @@ const TherapistCard = ({ therapist }) => {
       </div>
 
       <button
-        type="button"
         onClick={handleBookAppointment}
-        disabled={loading}
-        className={`mt-4 w-full py-2 rounded-lg text-white font-medium transition duration-200 ${
-          loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
-        }`}
+        className="mt-4 w-full py-2 rounded-lg text-white font-medium bg-blue-600 hover:bg-blue-700"
       >
-        {loading ? "Opening..." : "Book Appointment"}
+        Book Appointment
       </button>
     </div>
   );

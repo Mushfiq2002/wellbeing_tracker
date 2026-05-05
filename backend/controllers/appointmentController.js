@@ -3,9 +3,95 @@ const Appointment = require('../models/appointmentModel');
 const Therapist = require('../models/therapistModel');
 const User = require('../models/userModel');
 
-const SESSION_DURATION_MINUTES = 10; // testing: 10 minutes. Later change to 60.
+const SESSION_DURATION_MINUTES = 10;
 
-const normalizeName = (name) =>
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const normalizeDay = (day = '') => {
+  return day.trim().slice(0, 3);
+};
+
+const convertToMinutes = (time) => {
+  if (!time) return null;
+
+  const cleanTime = time.trim();
+
+  const format24 = cleanTime.match(/^(\d{1,2}):(\d{2})$/);
+  if (format24) {
+    const hour = parseInt(format24[1], 10);
+    const minute = parseInt(format24[2], 10);
+
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+
+    return hour * 60 + minute;
+  }
+
+  const format12 = cleanTime.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (format12) {
+    let hour = parseInt(format12[1], 10);
+    const minute = parseInt(format12[2] || '0', 10);
+    const period = format12[3].toUpperCase();
+
+    if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
+
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+
+    return hour * 60 + minute;
+  }
+
+  return null;
+};
+
+const isWithinAvailability = (availability, appointmentDate, timeSlot) => {
+  const [dayPart, timePart] = availability.split(',').map((p) => p.trim());
+
+  if (!dayPart || !timePart) return false;
+
+  const selectedDate = new Date(appointmentDate);
+  const selectedDay = DAYS[selectedDate.getDay()];
+
+  const [startDayRaw, endDayRaw] = dayPart.split('-');
+
+  const startDay = normalizeDay(startDayRaw);
+  const endDay = normalizeDay(endDayRaw);
+
+  const startDayIndex = DAYS.indexOf(startDay);
+  const endDayIndex = DAYS.indexOf(endDay);
+  const selectedDayIndex = DAYS.indexOf(selectedDay);
+
+  if (startDayIndex === -1 || endDayIndex === -1) return false;
+
+  let dayAllowed = false;
+
+  if (startDayIndex <= endDayIndex) {
+    dayAllowed =
+      selectedDayIndex >= startDayIndex && selectedDayIndex <= endDayIndex;
+  } else {
+    dayAllowed =
+      selectedDayIndex >= startDayIndex || selectedDayIndex <= endDayIndex;
+  }
+
+  if (!dayAllowed) return false;
+
+  const [startTimeText, endTimeText] = timePart.split('-').map((t) => t.trim());
+
+  const startMinutes = convertToMinutes(startTimeText);
+  const endMinutes = convertToMinutes(endTimeText);
+  const selectedMinutes = convertToMinutes(timeSlot);
+
+  if (
+    startMinutes === null ||
+    endMinutes === null ||
+    selectedMinutes === null
+  ) {
+    return false;
+  }
+
+  return selectedMinutes >= startMinutes && selectedMinutes <= endMinutes;
+};
+
+const normalizeName = (name = '') =>
   name.toLowerCase().replace(/\./g, '').replace(/\s+/g, '').trim();
 
 const findTherapistProfile = async (user) => {
@@ -22,136 +108,45 @@ const findTherapistProfile = async (user) => {
   return therapistProfile || null;
 };
 
-const timeToMinutes = (time) => {
-  let cleanTime = time.trim().toUpperCase();
-
-  const isPM = cleanTime.includes('PM');
-  const isAM = cleanTime.includes('AM');
-
-  cleanTime = cleanTime.replace('AM', '').replace('PM', '').trim();
-
-  let [hour, minute] = cleanTime.split(':');
-  hour = parseInt(hour, 10);
-  minute = minute ? parseInt(minute, 10) : 0;
-
-  if (isPM && hour !== 12) hour += 12;
-  if (isAM && hour === 12) hour = 0;
-
-  return hour * 60 + minute;
-};
-
-const getAllowedDays = (daysPart) => {
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const cleanDays = daysPart.replace(/\s/g, '');
-
-  if (cleanDays.includes('-')) {
-    const [startDay, endDay] = cleanDays.split('-');
-
-    const startIndex = dayNames.indexOf(startDay);
-    const endIndex = dayNames.indexOf(endDay);
-
-    if (startIndex === -1 || endIndex === -1) return [];
-
-    const allowedDays = [];
-    let i = startIndex;
-
-    while (true) {
-      allowedDays.push(dayNames[i]);
-      if (i === endIndex) break;
-      i = (i + 1) % 7;
-    }
-
-    return allowedDays;
-  }
-
-  return cleanDays.split('/').filter(Boolean);
-};
-
-const isValidSlot = (availability, appointmentDate, timeSlot) => {
-  try {
-    const [daysPart, timePart] = availability.split(',');
-
-    if (!daysPart || !timePart) return true;
-
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const selectedDate = new Date(appointmentDate);
-    const selectedDay = dayNames[selectedDate.getDay()];
-
-    const allowedDays = getAllowedDays(daysPart);
-
-    if (!allowedDays.includes(selectedDay)) {
-      return false;
-    }
-
-    const [startTime, endTime] = timePart.trim().split('-');
-
-    if (!startTime || !endTime) return true;
-
-    const selectedMinutes = timeToMinutes(timeSlot);
-    const startMinutes = timeToMinutes(startTime);
-    const endMinutes = timeToMinutes(endTime);
-
-    // Supports slots crossing midnight, e.g. 7 PM - 12 AM
-    if (endMinutes < startMinutes) {
-      return selectedMinutes >= startMinutes || selectedMinutes < endMinutes;
-    }
-
-    return selectedMinutes >= startMinutes && selectedMinutes < endMinutes;
-  } catch (error) {
-    return true;
-  }
-};
-
 const getAppointmentStartTime = (appointment) => {
-  const appointmentStart = new Date(appointment.appointmentDate);
-  const [hour, minute] = appointment.timeSlot.split(':');
+  const start = new Date(appointment.appointmentDate);
+  const minutes = convertToMinutes(appointment.timeSlot);
 
-  appointmentStart.setHours(parseInt(hour, 10));
-  appointmentStart.setMinutes(parseInt(minute, 10));
-  appointmentStart.setSeconds(0);
-  appointmentStart.setMilliseconds(0);
+  if (minutes === null) return start;
 
-  return appointmentStart;
+  start.setHours(Math.floor(minutes / 60));
+  start.setMinutes(minutes % 60);
+  start.setSeconds(0);
+  start.setMilliseconds(0);
+
+  return start;
 };
 
 const getAppointmentEndTime = (appointment) => {
-  const appointmentStart = getAppointmentStartTime(appointment);
-
-  return new Date(
-    appointmentStart.getTime() + SESSION_DURATION_MINUTES * 60 * 1000
-  );
+  const start = getAppointmentStartTime(appointment);
+  return new Date(start.getTime() + SESSION_DURATION_MINUTES * 60 * 1000);
 };
 
 const updateAppointmentStatus = async (appointment) => {
   if (appointment.status === 'cancelled') return appointment;
-
-  // If therapist manually marks done/missed, do not override it automatically
   if (appointment.therapistMarked) return appointment;
 
-  const appointmentEnd = getAppointmentEndTime(appointment);
   const now = new Date();
+  const end = getAppointmentEndTime(appointment);
 
-  if (now < appointmentEnd) {
+  if (now < end) {
     appointment.status = 'pending';
   }
 
-  if (now >= appointmentEnd && !appointment.sessionStarted) {
+  if (now >= end && !appointment.userJoined) {
     appointment.status = 'missed';
   }
 
-  if (
-    now >= appointmentEnd &&
-    appointment.sessionStarted &&
-    !appointment.isReviewed
-  ) {
+  if (now >= end && appointment.userJoined && !appointment.isReviewed) {
     appointment.status = 'review_pending';
   }
 
-  if (
-    now >= appointmentEnd &&
-    appointment.sessionStarted &&
-    appointment.isReviewed
-  ) {
+  if (now >= end && appointment.userJoined && appointment.isReviewed) {
     appointment.status = 'completed';
   }
 
@@ -182,16 +177,68 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    if (!isValidSlot(therapistData.availability, appointmentDate, timeSlot)) {
+    const selectedMinutes = convertToMinutes(timeSlot);
+
+    if (selectedMinutes === null) {
       return res.status(400).json({
-        message: `This therapist is only available at ${therapistData.availability}`,
+        message: 'Invalid time slot format. Use format like 6 PM, 6:30 PM, or 18:30',
+      });
+    }
+
+    const appointmentStart = new Date(appointmentDate);
+    appointmentStart.setHours(Math.floor(selectedMinutes / 60));
+    appointmentStart.setMinutes(selectedMinutes % 60);
+    appointmentStart.setSeconds(0);
+    appointmentStart.setMilliseconds(0);
+
+    const now = new Date();
+
+    if (appointmentStart <= now) {
+      return res.status(400).json({
+        message: 'You cannot book an appointment in the past',
+      });
+    }
+
+    const allowedByAvailability = isWithinAvailability(
+      therapistData.availability,
+      appointmentDate,
+      timeSlot
+    );
+
+    if (!allowedByAvailability) {
+      return res.status(400).json({
+        message: `Appointment must be within therapist availability: ${therapistData.availability}`,
+      });
+    }
+
+    const selectedMode = modeOfSession || 'online';
+
+    if (
+      therapistData.modeOfSession !== 'both' &&
+      therapistData.modeOfSession !== selectedMode
+    ) {
+      return res.status(400).json({
+        message: `This therapist only supports ${therapistData.modeOfSession} sessions`,
+      });
+    }
+
+    const alreadyBooked = await Appointment.findOne({
+      therapist,
+      appointmentDate: new Date(appointmentDate),
+      timeSlot,
+      status: { $ne: 'cancelled' },
+    });
+
+    if (alreadyBooked) {
+      return res.status(400).json({
+        message: 'This time slot is already booked',
       });
     }
 
     let sessionRoomId = '';
     let meetingLink = '';
 
-    if (modeOfSession === 'online') {
+    if (selectedMode === 'online') {
       sessionRoomId = crypto.randomBytes(16).toString('hex');
       meetingLink = `/session/${sessionRoomId}`;
     }
@@ -216,14 +263,16 @@ const createAppointment = async (req, res) => {
       therapist,
       appointmentDate,
       timeSlot,
-      modeOfSession,
-      notes,
+      modeOfSession: selectedMode,
+      notes: notes || '',
       status: 'pending',
       sessionRoomId,
       meetingLink,
       sessionStarted: false,
       sessionStartedAt: null,
       sessionEndedAt: null,
+      userJoined: false,
+      userJoinedAt: null,
       therapistMarked: false,
       therapistMarkedStatus: '',
       therapistMarkedAt: null,
@@ -237,9 +286,9 @@ const createAppointment = async (req, res) => {
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate(
         'therapist',
-        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive'
+        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive ratingWarning'
       )
-      .populate('user', 'name email');
+      .populate('user', 'name email discountAvailable');
 
     res.status(201).json(populatedAppointment);
   } catch (error) {
@@ -254,7 +303,7 @@ const getMyAppointments = async (req, res) => {
     const appointments = await Appointment.find({ user: req.user._id })
       .populate(
         'therapist',
-        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive'
+        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive ratingWarning'
       )
       .sort({ appointmentDate: 1, timeSlot: 1 });
 
@@ -298,16 +347,13 @@ const getTodayTherapistAppointments = async (req, res) => {
 
     const appointments = await Appointment.find({
       therapist: therapistProfile._id,
-      appointmentDate: {
-        $gte: start,
-        $lte: end,
-      },
+      appointmentDate: { $gte: start, $lte: end },
       status: { $ne: 'cancelled' },
     })
       .populate('user', 'name email')
       .populate(
         'therapist',
-        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive'
+        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive ratingWarning'
       )
       .sort({ appointmentDate: 1, timeSlot: 1 });
 
@@ -318,35 +364,79 @@ const getTodayTherapistAppointments = async (req, res) => {
       updatedAppointments.push(updated);
     }
 
-    const onlineCount = updatedAppointments.filter(
-      (appointment) => appointment.modeOfSession === 'online'
+    const activeAppointments = updatedAppointments.filter(
+      (a) => a.status === 'pending'
+    );
+
+    const doneAppointments = updatedAppointments.filter(
+      (a) => a.status === 'review_pending' || a.status === 'completed'
+    );
+
+    const missedAppointments = updatedAppointments.filter(
+      (a) => a.status === 'missed'
+    );
+
+    const onlineCount = activeAppointments.filter(
+      (a) => a.modeOfSession === 'online'
     ).length;
 
-    const offlineCount = updatedAppointments.filter(
-      (appointment) => appointment.modeOfSession === 'offline'
+    const offlineCount = activeAppointments.filter(
+      (a) => a.modeOfSession === 'offline'
     ).length;
 
-    const doneCount = updatedAppointments.filter(
-      (appointment) =>
+    const dayWise = {};
+
+    updatedAppointments.forEach((appointment) => {
+      const dateKey = appointment.appointmentDate.toISOString().split('T')[0];
+
+      if (!dayWise[dateKey]) {
+        dayWise[dateKey] = {
+          date: dateKey,
+          total: 0,
+          online: 0,
+          offline: 0,
+          pending: 0,
+          done: 0,
+          missed: 0,
+          appointments: [],
+        };
+      }
+
+      if (appointment.status === 'pending') {
+        dayWise[dateKey].total += 1;
+        dayWise[dateKey].pending += 1;
+
+        if (appointment.modeOfSession === 'online') {
+          dayWise[dateKey].online += 1;
+        }
+
+        if (appointment.modeOfSession === 'offline') {
+          dayWise[dateKey].offline += 1;
+        }
+      }
+
+      if (
         appointment.status === 'review_pending' ||
         appointment.status === 'completed'
-    ).length;
+      ) {
+        dayWise[dateKey].done += 1;
+      }
 
-    const missedCount = updatedAppointments.filter(
-      (appointment) => appointment.status === 'missed'
-    ).length;
+      if (appointment.status === 'missed') {
+        dayWise[dateKey].missed += 1;
+      }
 
-    const pendingCount = updatedAppointments.filter(
-      (appointment) => appointment.status === 'pending'
-    ).length;
+      dayWise[dateKey].appointments.push(appointment);
+    });
 
     res.status(200).json({
-      total: updatedAppointments.length,
+      total: activeAppointments.length,
       onlineCount,
       offlineCount,
-      doneCount,
-      missedCount,
-      pendingCount,
+      doneCount: doneAppointments.length,
+      missedCount: missedAppointments.length,
+      pendingCount: activeAppointments.length,
+      dayWise: Object.values(dayWise),
       appointments: updatedAppointments,
     });
   } catch (error) {
@@ -364,7 +454,7 @@ const getSessionAccess = async (req, res) => {
       .populate('user', 'name email')
       .populate(
         'therapist',
-        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive'
+        'name specialization location consultationFee availability modeOfSession rating totalReviews reviews isActive ratingWarning user'
       );
 
     if (!appointment) {
@@ -426,8 +516,14 @@ const getSessionAccess = async (req, res) => {
       appointment.sessionStarted = true;
       appointment.sessionStartedAt = now;
       appointment.sessionEndedAt = appointmentEnd;
-      await appointment.save();
     }
+
+    if (isPatient && !appointment.userJoined) {
+      appointment.userJoined = true;
+      appointment.userJoinedAt = now;
+    }
+
+    await appointment.save();
 
     res.status(200).json({
       message: 'Access granted',
@@ -452,7 +548,7 @@ const startSession = async (req, res) => {
 
     const appointment = await Appointment.findById(req.params.id).populate(
       'therapist',
-      'name specialization'
+      'name specialization user'
     );
 
     if (!appointment) {
@@ -537,7 +633,7 @@ const markSessionStatus = async (req, res) => {
 
     const appointment = await Appointment.findById(req.params.id).populate(
       'therapist',
-      'name specialization'
+      'name specialization user'
     );
 
     if (!appointment) {
@@ -570,6 +666,12 @@ const markSessionStatus = async (req, res) => {
       appointment.sessionStartedAt =
         appointment.sessionStartedAt || getAppointmentStartTime(appointment);
       appointment.sessionEndedAt = getAppointmentEndTime(appointment);
+
+      if (!appointment.userJoined) {
+        appointment.userJoined = true;
+        appointment.userJoinedAt = appointment.sessionStartedAt;
+      }
+
       appointment.status = appointment.isReviewed
         ? 'completed'
         : 'review_pending';
@@ -579,6 +681,8 @@ const markSessionStatus = async (req, res) => {
       appointment.sessionStarted = false;
       appointment.sessionStartedAt = null;
       appointment.sessionEndedAt = getAppointmentEndTime(appointment);
+      appointment.userJoined = false;
+      appointment.userJoinedAt = null;
       appointment.status = 'missed';
     }
 

@@ -34,7 +34,6 @@ const Therapists = () => {
       </h1>
 
       <p className="text-center text-gray-500 mb-8">
-        Therapists with rating below 3 are automatically removed from this list.
       </p>
 
       {therapists.length === 0 ? (

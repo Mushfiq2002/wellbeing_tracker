@@ -1,88 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../services/axiosInstance';
 
 const ReviewTherapist = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { appointmentId } = useParams();
+  const params = useParams();
 
-  const appointment = location.state?.appointment;
-  const therapistId = location.state?.therapistId || appointment?.therapist?._id;
+  const therapist = location.state?.therapist || null;
+  const therapistId = therapist?._id || params.therapistId;
+  const appointmentId = location.state?.appointmentId || null;
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const userInfo =
+  const user =
     JSON.parse(localStorage.getItem('user')) ||
     JSON.parse(localStorage.getItem('userInfo'));
+
+  useEffect(() => {
+    if (!appointmentId) {
+      alert('Review তথ্য missing. My Appointments থেকে আবার চেষ্টা করো।');
+      navigate('/my-appointments');
+    }
+  }, [appointmentId, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!therapistId) {
-      alert('Therapist information missing. Please go back to My Appointments.');
+    if (!user?.token) {
+      alert('Please login first.');
       return;
     }
 
-    if (rating === 0) {
-      alert('Please select a star rating.');
+    if (!therapistId || !appointmentId) {
+      alert('Review তথ্য missing. My Appointments থেকে আবার চেষ্টা করো।');
+      navigate('/my-appointments');
+      return;
+    }
+
+    if (!rating) {
+      alert('Please select a rating.');
       return;
     }
 
     try {
       setLoading(true);
 
-      await axios.post(
-        `http://localhost:5000/api/therapists/${therapistId}/reviews`,
+      await axiosInstance.post(
+        `/therapists/${therapistId}/reviews`,
         {
           rating: Number(rating),
-          comment,
+          comment: comment.trim(),
           appointmentId,
         },
         {
           headers: {
-            Authorization: `Bearer ${userInfo.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
 
-      alert(
-        'Review submitted successfully! You unlocked 5% discount for your next appointment with any therapist.'
-      );
-
+      alert('Review submitted! 5% discount unlocked 🎉');
       navigate('/my-appointments');
     } catch (error) {
-      alert(error?.response?.data?.message || 'Review submit failed');
+      alert(error?.response?.data?.message || 'Review failed');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!userInfo?.token) {
+  if (!user?.token) {
     return <div className="p-6 text-center">Please login first.</div>;
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6">
-      <div className="bg-white shadow-lg rounded-xl border p-6">
-        <h1 className="text-3xl font-bold text-center mb-2">
-          Review & Rating Feature
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="bg-white shadow rounded-xl border p-6">
+        <h1 className="text-3xl font-bold text-center mb-3">
+          Review & Rating
         </h1>
 
-        <p className="text-center text-gray-600 mb-3">
-          Rate your completed session and share your experience.
-        </p>
-
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg p-3 mb-5 text-center">
-          Submit a review and rating to get <b>5% discount</b> on your next
-          appointment with <b>any therapist</b>.
-        </div>
-
-        {appointment?.therapist?.name && (
-          <p className="mb-4 text-center">
-            <b>Therapist:</b> {appointment.therapist.name}
+        {therapist?.name && (
+          <p className="text-center mb-4">
+            <b>Therapist:</b> {therapist.name}
           </p>
         )}
 
@@ -95,7 +97,7 @@ const ReviewTherapist = () => {
                 type="button"
                 key={star}
                 onClick={() => setRating(star)}
-                className={`text-3xl ${
+                className={`text-4xl ${
                   star <= rating ? 'text-yellow-500' : 'text-gray-300'
                 }`}
               >
@@ -104,34 +106,24 @@ const ReviewTherapist = () => {
             ))}
           </div>
 
-          <p className="mb-4 text-sm text-gray-600">
-            Selected rating: {rating === 0 ? 'No rating selected' : `${rating} star${rating > 1 ? 's' : ''}`}
-          </p>
-
-          <label className="block font-semibold mb-2">Review</label>
-
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            rows="5"
+            rows="4"
             placeholder="Write your experience..."
-            className="w-full border rounded-lg p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border p-3 rounded mb-4"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+            className={`w-full text-white py-3 rounded ${
+              loading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            {loading ? 'Submitting...' : 'Submit Review & Rating'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/my-appointments')}
-            className="w-full mt-3 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300"
-          >
-            Back
+            {loading ? 'Submitting...' : 'Submit Review'}
           </button>
         </form>
       </div>

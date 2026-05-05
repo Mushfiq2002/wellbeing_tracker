@@ -11,6 +11,11 @@ const reviewSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    appointment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Appointment',
+      default: null,
+    },
     rating: {
       type: Number,
       required: true,
@@ -39,7 +44,17 @@ const therapistSchema = mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
     specialization: {
       type: String,
       required: true,
@@ -62,10 +77,9 @@ const therapistSchema = mongoose.Schema(
       default: 'both',
     },
 
-    // Rating & Review System
     rating: {
       type: Number,
-      default: 0,
+      default: 5,
       min: 0,
       max: 5,
     },
@@ -75,10 +89,19 @@ const therapistSchema = mongoose.Schema(
     },
     reviews: [reviewSchema],
 
-    // Automated Therapist Removal System
     isActive: {
       type: Boolean,
       default: true,
+    },
+
+    ratingWarning: {
+      type: String,
+      default: '',
+    },
+
+    isRemovedDueToLowRating: {
+      type: Boolean,
+      default: false,
     },
   },
   {
