@@ -11,7 +11,8 @@ import {
     Users,
     Activity,
     ShieldAlert,
-    BookOpen
+    BookOpen,
+    Target
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -33,6 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen, isCollapsed }) => {
                 { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
                 { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
                 { name: 'Study Tracker', path: '/study-tracker', icon: BookOpen },
+                { name: 'Goal Tracker', path: '/goal-tracker', icon: Target },
             ]
         },
         {
