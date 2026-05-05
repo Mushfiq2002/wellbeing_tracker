@@ -1,69 +1,112 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../services/axiosInstance';
+import { useSelector } from 'react-redux';
 
 const MyAppointments = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user: reduxUser } = useSelector((state) => state.auth);
 
-  const userInfo =
+  const user =
+    reduxUser ||
     JSON.parse(localStorage.getItem('user')) ||
     JSON.parse(localStorage.getItem('userInfo'));
 
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const formatTime = (time) => {
+    if (!time) return 'N/A';
+
+    const [hour, minute = '00'] = time.split(':');
+    let h = parseInt(hour, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+
+    h = h % 12 || 12;
+
+    return `${h}:${minute} ${ampm}`;
+  };
+
+  const statusText = (status) => {
+    if (status === 'pending') return 'Pending';
+    if (status === 'missed') return 'Missed';
+    if (status === 'review_pending') return 'Review Pending';
+    if (status === 'completed') return 'Completed';
+    if (status === 'cancelled') return 'Cancelled';
+
+    return status;
+  };
+
+  const canJoin = (appointment) => {
+    if (!appointment?.appointmentDate || !appointment?.timeSlot) return false;
+
+    const start = new Date(appointment.appointmentDate);
+    const [h, m = '00'] = appointment.timeSlot.split(':');
+
+    start.setHours(parseInt(h, 10));
+    start.setMinutes(parseInt(m, 10));
+    start.setSeconds(0);
+    start.setMilliseconds(0);
+
+    const now = new Date();
+
+    return now >= start;
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const { data } = await axiosInstance.get('/appointments/my', {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      setAppointments(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data } = await axios.get(
-          'http://localhost:8000/api/appointments/my',
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
-
-        setAppointments(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Error fetching appointments:', error.response?.data || error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userInfo?.token) {
+    if (user?.token) {
       fetchAppointments();
     } else {
       setLoading(false);
     }
-  }, [userInfo]);
+  }, []);
 
   const handleCancel = async (id) => {
+    if (!window.confirm('Cancel this appointment?')) return;
+
     try {
-      await axios.put(
-        `http://localhost:8000/api/appointments/${id}/cancel`,
+      await axiosInstance.put(
+        `/appointments/${id}/cancel`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${userInfo.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
 
-      setAppointments((prev) =>
-        prev.map((appointment) =>
-          appointment._id === id
-            ? { ...appointment, status: 'cancelled' }
-            : appointment
-        )
-      );
-
-      alert('Appointment cancelled successfully');
+      fetchAppointments();
     } catch (error) {
-      console.error('Cancel error:', error.response?.data || error.message);
-      alert(error?.response?.data?.message || 'Failed to cancel appointment');
+      alert(error?.response?.data?.message || 'Cancel failed');
     }
   };
 
-  if (!userInfo?.token) {
+  const handleGiveReview = (appointment) => {
+    navigate(`/review/${appointment.therapist?._id}`, {
+      state: {
+        appointmentId: appointment._id,
+        therapist: appointment.therapist,
+      },
+    });
+  };
+
+  if (!user?.token) {
     return <div className="p-6 text-center">Please login first.</div>;
   }
 
@@ -73,7 +116,9 @@ const MyAppointments = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Appointments</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        My Appointments
+      </h1>
 
       {appointments.length === 0 ? (
         <p className="text-center">No appointments found.</p>
@@ -82,53 +127,119 @@ const MyAppointments = () => {
           {appointments.map((appointment) => (
             <div
               key={appointment._id}
-              className="bg-white shadow rounded-lg p-4 border"
+              className="bg-white shadow rounded-lg p-5 border"
             >
               <h2 className="text-xl font-semibold mb-2">
                 {appointment.therapist?.name || 'Therapist'}
               </h2>
 
               <p>
-                <strong>Specialization:</strong>{' '}
-                {appointment.therapist?.specialization || 'N/A'}
+                <b>Date:</b>{' '}
+                {appointment.appointmentDate?.substring(0, 10) || 'N/A'}
               </p>
 
               <p>
-                <strong>Date:</strong>{' '}
-                {appointment.appointmentDate
-                  ? appointment.appointmentDate.substring(0, 10)
-                  : 'N/A'}
+                <b>Time:</b> {formatTime(appointment.timeSlot)}
               </p>
 
-              <p><strong>Time:</strong> {appointment.timeSlot || 'N/A'}</p>
-              <p><strong>Mode:</strong> {appointment.modeOfSession || 'N/A'}</p>
-              <p><strong>Status:</strong> {appointment.status || 'pending'}</p>
+              <p>
+                <b>Mode:</b> {appointment.modeOfSession}
+              </p>
 
-              {appointment.notes && (
-                <p><strong>Notes:</strong> {appointment.notes}</p>
+              <p>
+                <b>Status:</b> {statusText(appointment.status)}
+              </p>
+
+              <p>
+                <b>Payment:</b>{' '}
+                {appointment.paymentStatus === 'paid' ? (
+                  <span className="text-green-600 font-semibold">Paid</span>
+                ) : (
+                  <span className="text-red-600 font-semibold">Unpaid</span>
+                )}
+              </p>
+
+              {appointment.finalFee > 0 && (
+                <p>
+                  <b>Paid Amount:</b> ৳{appointment.finalFee}
+                </p>
               )}
 
-              {appointment.modeOfSession === 'online' &&
-                appointment.meetingLink &&
-                appointment.status !== 'cancelled' && (
-                  <a
-                    href={appointment.meetingLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-block mt-3 mr-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              {appointment.discountApplied && (
+                <p className="text-green-600">
+                  <b>Discount Applied:</b> 5% review discount
+                </p>
+              )}
+
+              {appointment.status === 'review_pending' && (
+                <p className="mt-3 text-sm text-yellow-600">
+                  Please give a review to complete this session.
+                </p>
+              )}
+
+              <div className="mt-4 flex gap-2 flex-wrap">
+                {appointment.paymentStatus !== 'paid' &&
+                  appointment.status !== 'cancelled' && (
+                    <button
+                      onClick={() => navigate(`/payment/${appointment._id}`)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                    >
+                      Pay Now
+                    </button>
+                  )}
+
+                {appointment.modeOfSession === 'online' &&
+                  appointment.status === 'pending' &&
+                  appointment.meetingLink && (
+                    <button
+                      onClick={() => navigate(appointment.meetingLink)}
+                      disabled={!canJoin(appointment)}
+                      className={`px-4 py-2 rounded text-white ${
+                        canJoin(appointment)
+                          ? 'bg-green-600 hover:bg-green-700'
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Join Session
+                    </button>
+                  )}
+
+                {appointment.status === 'review_pending' && (
+                  <button
+                    onClick={() => handleGiveReview(appointment)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                   >
-                    Join Session
-                  </a>
+                    Give Review
+                  </button>
                 )}
 
-              {appointment.status !== 'cancelled' && (
-                <button
-                  onClick={() => handleCancel(appointment._id)}
-                  className="inline-block mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                >
-                  Cancel Appointment
-                </button>
-              )}
+                {appointment.status === 'pending' && (
+                  <button
+                    onClick={() => handleCancel(appointment._id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                  >
+                    Cancel
+                  </button>
+                )}
+
+                {appointment.status === 'completed' && (
+                  <span className="bg-green-100 text-green-700 px-4 py-2 rounded">
+                    All Complete
+                  </span>
+                )}
+
+                {appointment.status === 'missed' && (
+                  <span className="bg-red-100 text-red-700 px-4 py-2 rounded">
+                    Session Missed
+                  </span>
+                )}
+
+                {appointment.status === 'cancelled' && (
+                  <span className="bg-gray-100 text-gray-700 px-4 py-2 rounded">
+                    Cancelled
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>

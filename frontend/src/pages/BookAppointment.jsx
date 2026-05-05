@@ -27,6 +27,12 @@ const BookAppointment = () => {
       return;
     }
 
+    if (userInfo?.role === 'therapist') {
+      alert('Therapists cannot book appointments as patients.');
+      navigate('/therapist-appointments');
+      return;
+    }
+
     const fetchTherapists = async () => {
       try {
         const { data } = await axios.get('http://localhost:8000/api/therapists');
@@ -44,7 +50,7 @@ const BookAppointment = () => {
         therapist: id,
       }));
     }
-  }, [navigate, userInfo, id]);
+  }, [id, navigate]);
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -84,9 +90,14 @@ const BookAppointment = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Book Appointment</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Book Appointment
+      </h1>
 
-      <form onSubmit={submitHandler} className="bg-white shadow-md rounded-lg p-6 space-y-4">
+      <form
+        onSubmit={submitHandler}
+        className="bg-white shadow-md rounded-lg p-6 space-y-4"
+      >
         <div>
           <label className="block mb-2 font-medium">Select Therapist</label>
           <select
@@ -142,6 +153,13 @@ const BookAppointment = () => {
           </select>
         </div>
 
+        {formData.modeOfSession === 'online' && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded">
+            A secure online session link will be generated after booking. Only
+            the patient and assigned therapist can access it.
+          </div>
+        )}
+
         <div>
           <label className="block mb-2 font-medium">Notes</label>
           <textarea
@@ -157,7 +175,7 @@ const BookAppointment = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
         >
           {loading ? 'Booking...' : 'Book Appointment'}
         </button>
