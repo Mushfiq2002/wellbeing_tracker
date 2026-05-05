@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import axiosInstance from '../services/axiosInstance';
+import DailyMotivation from '../components/ui/DailyMotivation';
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -58,7 +58,8 @@ const Dashboard = () => {
         </CardHeader>
 
         <CardContent className="p-8">
-          <div className="bg-blue-50 rounded-lg p-6 border border-blue-100 mb-6">
+          <DailyMotivation />
+          <div className="bg-blue-50 rounded-lg p-6 mb-6 border border-blue-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
               Hello, {user.name}!
             </h2>

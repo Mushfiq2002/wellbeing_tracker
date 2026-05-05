@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   BookOpen,
   Star,
+  Target,
   CreditCard,
 } from 'lucide-react';
 
@@ -33,6 +34,7 @@ const Sidebar = () => {
         { name: 'Sleep Tracker', path: '/sleep-tracker', icon: Moon },
         { name: 'Daily Mood', path: '/mood-tracker', icon: Smile },
         { name: 'Study Tracker', path: '/study-tracker', icon: BookOpen },
+        { name: 'Goal Tracker', path: '/goal-tracker', icon: Target },
       ],
     },
     {
@@ -46,12 +48,12 @@ const Sidebar = () => {
 
         ...(role === 'therapist'
           ? [
-              {
-                name: 'Therapist Dashboard',
-                path: '/therapist-appointments',
-                icon: Activity,
-              },
-            ]
+            {
+              name: 'Therapist Dashboard',
+              path: '/therapist-appointments',
+              icon: Activity,
+            },
+          ]
           : []),
       ],
     },
@@ -72,10 +74,9 @@ const Sidebar = () => {
   ];
 
   const linkClass = (path) =>
-    `flex items-center gap-2 px-3 py-2 rounded-md transition ${
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-        ? 'bg-blue-100 text-blue-600'
-        : 'text-gray-600 hover:bg-gray-100'
+    `flex items-center gap-2 px-3 py-2 rounded-md transition ${location.pathname === path || location.pathname.startsWith(`${path}/`)
+      ? 'bg-blue-100 text-blue-600'
+      : 'text-gray-600 hover:bg-gray-100'
     }`;
 
   return (

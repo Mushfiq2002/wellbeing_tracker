@@ -1,3 +1,4 @@
+import DailyMotivation from './components/ui/DailyMotivation';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Layout from './components/Layout';
@@ -23,6 +24,7 @@ import MoodTracker from './pages/MoodTracker';
 import Friends from './pages/Friends';
 import EmergencyContacts from './pages/EmergencyContacts';
 import StudyTracker from './pages/StudyTracker';
+import GoalTracker from './components/ui/GoalTracker';
 
 // 🔥 Payment imports
 import Payment from './pages/Payment';
@@ -57,10 +59,11 @@ function App() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/emergency-contacts" element={<EmergencyContacts />} />
           <Route path="/study-tracker" element={<StudyTracker />} />
-
+          <Route path="/goal-tracker" element={<GoalTracker />} />
           {/* 🔥 Payment routes */}
           <Route path="/payments" element={<Payments />} />
           <Route path="/payment/:id" element={<Payment />} />
+
         </Routes>
       </Layout>
     </Router>
