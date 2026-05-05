@@ -8,6 +8,8 @@ const sleepRoutes = require('./routes/sleepRoutes');
 const todoRoutes = require('./routes/todoRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
 const streakRoutes = require('./routes/streakRoutes');
+const checkinRoutes = require('./routes/checkinRoutes');
+const reminderRoutes = require('./routes/reminderRoutes');
 
 dotenv.config();
 
@@ -27,6 +29,8 @@ app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/streaks', streakRoutes);
+app.use('/api/checkin', checkinRoutes);
+app.use('/api/reminders', reminderRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
