@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import DailyMotivation from '../components/ui/DailyMotivation';
+import axiosInstance from '../services/axiosInstance';
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -11,18 +12,29 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchTherapistData = async () => {
+      if (user?.role !== 'therapist' || !user?.token) return;
+
       try {
-        if (user?.role === 'therapist' && user?.token) {
-          setLoadingTherapist(true);
+        setLoadingTherapist(true);
 
-          const { data } = await axiosInstance.get('/therapists/me/profile', {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          });
+        const { data } = await axiosInstance.get('/therapists', {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
 
-          setTherapistData(data);
-        }
+        const myData = data.find((t) => {
+          const therapistUserId =
+            typeof t.user === 'object' ? t.user?._id : t.user;
+
+          return (
+            therapistUserId === user._id ||
+            t.email?.toLowerCase() === user.email?.toLowerCase() ||
+            t.name?.toLowerCase() === user.name?.toLowerCase()
+          );
+        });
+
+        setTherapistData(myData || null);
       } catch (error) {
         console.error(
           error?.response?.data?.message || 'Failed to load therapist data'
@@ -59,6 +71,7 @@ const Dashboard = () => {
 
         <CardContent className="p-8">
           <DailyMotivation />
+
           <div className="bg-blue-50 rounded-lg p-6 mb-6 border border-blue-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
               Hello, {user.name}!

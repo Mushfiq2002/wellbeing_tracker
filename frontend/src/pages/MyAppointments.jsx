@@ -179,7 +179,8 @@ const MyAppointments = () => {
 
               <div className="mt-4 flex gap-2 flex-wrap">
                 {appointment.paymentStatus !== 'paid' &&
-                  appointment.status !== 'cancelled' && (
+                  appointment.status !== 'cancelled' &&
+                  appointment.status !== 'missed' && (
                     <button
                       onClick={() => navigate(`/payment/${appointment._id}`)}
                       className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
