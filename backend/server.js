@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
+
 const userRoutes = require('./routes/userRoutes');
 const sleepRoutes = require('./routes/sleepRoutes');
 const todoRoutes = require('./routes/todoRoutes');
@@ -10,10 +11,17 @@ const calendarRoutes = require('./routes/calendarRoutes');
 const streakRoutes = require('./routes/streakRoutes');
 const checkinRoutes = require('./routes/checkinRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
+const therapistRoutes = require('./routes/therapistRoutes');
+const sleepRoutes = require('./routes/sleepRoutes');
+const todoRoutes = require('./routes/todoRoutes');
+const medicineRoutes = require('./routes/medicineRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const friendRoutes = require('./routes/friendRoutes');
+const moodRoutes = require('./routes/moodRoutes');
 
 dotenv.config();
 
-// Connect to database
+// Connect DB
 connectDB();
 
 const app = express();
@@ -23,7 +31,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Routes
+// Routes ✅ (ALL routes must be here)
 app.use('/api/users', userRoutes);
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/todos', todoRoutes);
@@ -31,6 +39,14 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/streaks', streakRoutes);
 app.use('/api/checkin', checkinRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/therapists', therapistRoutes);
+app.use('/api/sleep', sleepRoutes);
+app.use('/api/todos', todoRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/moods', moodRoutes);
+
+app.use('/api/appointments', require('./routes/appointmentRoutes'));
 
 app.get('/', (req, res) => {
   res.send('API is running...');
@@ -39,6 +55,7 @@ app.get('/', (req, res) => {
 // Error Middleware
 app.use(errorHandler);
 
+// Server start
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
