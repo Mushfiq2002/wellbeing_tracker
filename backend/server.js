@@ -15,6 +15,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const friendRoutes = require('./routes/friendRoutes');
 const moodRoutes = require('./routes/moodRoutes');
 const studyRoutes = require('./routes/studyRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/moods', moodRoutes);
 app.use('/api/study', studyRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
@@ -57,10 +59,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-const paymentRoutes = require('./routes/paymentRoutes');
-
-app.use('/api/payments', paymentRoutes);
-
-
 
 });

@@ -21,6 +21,26 @@ const userSchema = mongoose.Schema(
       enum: ['user', 'therapist'],
       default: 'user',
     },
+    description: {
+      type: String,
+      default: '',
+    },
+    lastLogin: {
+      type: Date,
+    },
+    warningEmailSentAt: {
+      type: Date,
+    },
+    emergencyAlertSentAt: {
+      type: Date,
+    },
+    emergencyContacts: [
+      {
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        relation: { type: String, required: true },
+      }
+    ],
     discountAvailable: {
       type: Boolean,
       default: false,

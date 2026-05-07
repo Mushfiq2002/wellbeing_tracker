@@ -5,8 +5,8 @@ const { sendWarningEmail, sendEmergencyAlertEmail } = require('../services/email
 // Run everyday at midnight: '0 0 * * *'
 // For testing purposes, you could change this to '* * * * *' to run every minute.
 const startEmergencyAlertJob = () => {
-    cron.schedule('0 0 * * *', async () => {
-        //cron.schedule('* * * * *', async () => {
+    //cron.schedule('0 0 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         console.log('Running emergency alert cron job...');
         try {
             const now = new Date();

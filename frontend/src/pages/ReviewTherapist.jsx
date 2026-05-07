@@ -21,7 +21,7 @@ const ReviewTherapist = () => {
 
   useEffect(() => {
     if (!appointmentId) {
-      alert('Review তথ্য missing. My Appointments থেকে আবার চেষ্টা করো।');
+      alert('Review info missing. Try from My Appointments.');
       navigate('/my-appointments');
     }
   }, [appointmentId, navigate]);
@@ -35,7 +35,7 @@ const ReviewTherapist = () => {
     }
 
     if (!therapistId || !appointmentId) {
-      alert('Review তথ্য missing. My Appointments থেকে আবার চেষ্টা করো।');
+      alert('Review info missing. Try from My Appointments');
       navigate('/my-appointments');
       return;
     }
@@ -97,9 +97,8 @@ const ReviewTherapist = () => {
                 type="button"
                 key={star}
                 onClick={() => setRating(star)}
-                className={`text-4xl ${
-                  star <= rating ? 'text-yellow-500' : 'text-gray-300'
-                }`}
+                className={`text-4xl ${star <= rating ? 'text-yellow-500' : 'text-gray-300'
+                  }`}
               >
                 ★
               </button>
@@ -117,11 +116,10 @@ const ReviewTherapist = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full text-white py-3 rounded ${
-              loading
+            className={`w-full text-white py-3 rounded ${loading
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+              }`}
           >
             {loading ? 'Submitting...' : 'Submit Review'}
           </button>
